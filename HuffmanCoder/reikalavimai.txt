@@ -1,0 +1,37 @@
+KODAVIMO ALGORITMAMS REIKALAVIMAI:
+
+- Geriau neskaityt į atmintį nieko
+	- pvz pirmą kartą persiskaityt sužinot ten dažnius atitinkamus, antrą kartą jau koduoti realiai
+
+HAFMANO KODUI:
+
+Teksto vieneto ilgis - turi būti toks parametras programoje
+	bet kokia K bitų kombinacija
+	K = [2; 24]
+
+	runninant pvz
+	algoritmas.exe failas.dat K
+
+	ir, aišku, išsaugot šitą info koduotam faile
+
+	pagalvot, kaip parašyt. tai realiai per penkis bitus galima parašyt (xxxxx)
+
+--- abėcėlės dydis smthng smthng
+
+LZW:
+
+	- Standartiškai raidė - baitas (nebus reikalavimo kaip aname)
+	- Parametras - žodyno dydis
+		- kas daroma su žodynu, kai jis prisipildo?
+			-- arba pasiekus ribą nebevystom žodyną ir su esamu dirbam, arba išmetam lauk žodyną ir kuriam iš naujo
+		- nuo žodyno dydžio priklauso įrašo dydis
+		- teksto frazė keičiama nuoroda į žodyną
+		- kuo ilgesnę frazę sugebam užkoduoti nuoroda, tai daugiau suspaudžiam
+		- bet kuo didesnis žodynas, tuo daugiau adresams reikia
+		! LZW žodynas - medis, žodyno perdarinėt nereikės (?);
+		- koduojant tuo pačiu metu ir kuriamas žodynas, ir rašomi frazių įrašai į archyvą, žodynas gyvas, kol archyvuojama
+		- dekoderis sugeba atsistatyti žodyną dekoduojant
+		- Galima riboti frazių skaičių žodyne
+		- Variantas, kai neribojame žodyno dydžio
+
+Users⁩ ▸ ⁨Vilys⁩ ▸ ⁨Downloads

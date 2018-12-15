@@ -15,8 +15,26 @@ public class HuffmanCoder {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("TEST");
         // TODO code application logic here
+//        String command = args[0];
+//        String filePath = args[1];
+//        int K = Integer.parseInt(args[2]);
+        String command = "Encode";
+        switch (command) {
+            case "Encode": {
+                //Encoder class
+                HuffmanEncoder encoder = new HuffmanEncoder("reikalavimai.txt",5);
+                break;
+            }
+            case "Decode": {
+                //Decoder class
+                break;
+            }
+            default: {
+                System.out.println("Unrecognized command");
+                break;
+            }
+        }
     }
     
 }
