@@ -10,15 +10,24 @@ package huffmancoder.entities;
  * @author Vilys
  */
 public class Node {
-    private final String character;
-    private final float freq;
-    private final Node left, right;
+    private String character;
+    private int freq;
+    private Node left, right;
     
-    public Node(String character, float freq, Node left, Node right) {
+    public Node(String character, int freq, Node left, Node right) {
         this.character = character;
         this.freq = freq;
         this.left = left;
         this.right = right;
+    }
+    
+    public Node(int freq, Node left, Node right) {
+        this.freq = freq;
+        this.left = left;
+        this.right = right;
+    }
+
+    public Node() {
     }
     
     public boolean checkIfLeaf() {
@@ -27,5 +36,33 @@ public class Node {
     
     public float compareFreq(Node otherNode) {
         return this.freq - otherNode.freq;
+    }
+    
+    public void setFreq(int freq) {
+        this.freq = freq;
+    }
+    
+    public void setLeftNode(Node left) {
+        this.left = left;
+    }
+    
+    public void setRightNode(Node right) {
+        this.right = right;
+    }
+    
+    public int getFreq() {
+        return freq;
+    }
+    
+    public String getCharacter() {
+        return character;
+    }
+
+    public Node getLeft() {
+        return left;
+    }
+    
+    public Node getRight() {
+        return right;
     }
 }

@@ -6,10 +6,13 @@
 package huffmancoder;
 
 import huffmancoder.entities.FreqTable;
+import huffmancoder.entities.Node;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 /**
  *
  * @author Vilys
@@ -30,9 +33,19 @@ public class HuffmanEncoder {
             while((i = input.read())!=-1) {
                 this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
-            this.frequencyTable.forEach((line) -> {
-            System.out.println(line.getByteSeq()+"\t"+line.getFreq());
-        });
+            Collections.sort(frequencyTable, new Comparator<FreqTable>() {
+                @Override
+                public int compare(FreqTable freq1, FreqTable freq2 )
+                {
+                    return  freq1.getFreq() - freq2.getFreq();
+                }
+            });
+            
+//            this.frequencyTable.forEach((line) -> {
+//                System.out.println(line.getFreq());
+//            });
+            Node root = this.CreateTree();
+            this.PrintTree(root);
         }
         catch(Exception ex) {
             System.out.println(ex);
@@ -68,8 +81,6 @@ public class HuffmanEncoder {
                     else {
                         byteStringToOperate = this.byteStringLeftover + 
                                 byteString.substring(0,K-this.byteStringLeftover.length());
-                        System.out.println(K-this.byteStringLeftover.length());
-                        System.out.println(byteString);
                         this.byteStringLeftover = byteString.substring(this.byteStringLeftover.length());
                         
                         this.frequencyTable.forEach((line) -> {
@@ -135,6 +146,35 @@ public class HuffmanEncoder {
         catch(Exception ex) {
             System.out.println(ex);
         }
+    }
+    
+    public Node CreateTree() {
+        ArrayList<Node> treeArray = new ArrayList<Node>();
+        this.frequencyTable.forEach((line) -> {
+            treeArray.add(new Node(line.getByteSeq(),line.getFreq(),null,null));
+        });
+        
+        while (treeArray.size() > 1) {
+            Node left = treeArray.get(0);
+            treeArray.remove(0);
+            Node right = treeArray.get(0);
+            treeArray.remove(0);
+            Node parent = new Node(left.getFreq()+right.getFreq(),left,right);
+            treeArray.add(parent);
+        }
+        return treeArray.get(0);
+    }
+    
+    private static void PrintTree(Node node) {
+        if (node.checkIfLeaf()) {
+            System.out.print("|Leaf|="+true);
+            System.out.print("|Character|="+node.getCharacter());
+            System.out.println("|Freq|="+node.getFreq());
+            return;
+        }
+        System.out.println("|Leaf|="+false);
+        PrintTree(node.getLeft());
+        PrintTree(node.getRight());
     }
     
 }
