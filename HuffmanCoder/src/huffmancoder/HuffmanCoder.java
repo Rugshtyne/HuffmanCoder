@@ -19,11 +19,11 @@ public class HuffmanCoder {
 //        String command = args[0];
 //        String filePath = args[1];
 //        int K = Integer.parseInt(args[2]);
-        String command = "Decode";
+        String command = "Encode";
         switch (command) {
             case "Encode": {
                 //Encoder class
-                HuffmanEncoder encoder = new HuffmanEncoder("reikalavimai.txt",8);
+                HuffmanEncoder encoder = new HuffmanEncoder("foto.png",8);
                 break;
             }
             case "Decode": {

@@ -6,10 +6,16 @@
 package huffmancoder;
 
 import huffmancoder.entities.FreqTable;
+import huffmancoder.entities.LookupTable;
 import huffmancoder.entities.Node;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,27 +26,31 @@ import java.util.Comparator;
 public class HuffmanEncoder {
     
     private ArrayList<FreqTable> frequencyTable;
+    private ArrayList<LookupTable> lookupTable;
     private int K;
     private String byteStringLeftover = "";
     
     public HuffmanEncoder(String fileToRead, int K) {
         try {
             this.frequencyTable = new ArrayList<FreqTable>();
+            this.lookupTable = new ArrayList<LookupTable>();
             this.K = K;
             File a = new File(fileToRead);
-            InputStream input = new FileInputStream(a);
+            BufferedReader input = new BufferedReader(new FileReader(a));
             int i = 0;            
-            while((i = input.read())!=-1) {
+            while((i = input.read()) != -1) {
+                //this.appendFile(fileToRead, String.valueOf((char)i));
                 this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
-            
-//            this.frequencyTable.forEach((line) -> {
-//                    System.out.println(line.getByteSeq() + "\t" + line.getFreq());
-//                });
-            
             Node root = this.CreateTree();
-            System.out.println("|"+K+"|");
-            this.PrintTree(root);
+            //System.out.println("|"+K+"|");
+            //this.PrintTree(root);
+            this.buildCode(root, "");
+            //this.writeFile(fileToRead);
+//            for(LookupTable record : this.lookupTable) {
+//                System.out.println(record.getCharacter()+"\t"+record.getTreePath());
+//            }
+            this.HashFile(fileToRead);
         }
         catch(Exception ex) {
             System.out.println(ex);
@@ -183,19 +193,96 @@ public class HuffmanEncoder {
         return removedNode;
     }
     
-
-    
-    private static void PrintTree(Node node) {
+    private void PrintTree(Node node) {
         if (node.checkIfLeaf()) {
-            System.out.println(true);
-            System.out.println(node.getCharacter());
+            System.out.print(1);
+            System.out.print(node.getCharacter());
             return;
         }
         
-        System.out.println(false);
+        System.out.print(0);
         PrintTree(node.getLeft());
         PrintTree(node.getRight());
         
     }
+    
+    private String chopStringUsingK(String byteString) {
+        String byteStringToReturn = byteString;
+        
+        if(K % 8 == 0) {
+            if (K == 8) {
+                byteStringToReturn = byteString;
+            }
+        }
+        return byteStringToReturn;
+    }
+    
+    private void HashFile(String fileToRead) {
+        try {
+        File file = new File(fileToRead);
+        BufferedReader input = new BufferedReader(new FileReader(file));
+            int i = 0;      
+            while((i = input.read())!=-1) {
+                String toCode = this.chopStringUsingK(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
+                //System.out.println((char)i);
+                for(LookupTable record : this.lookupTable) {
+                if(record.getCharacter().equals(toCode)) {
+                    //System.out.println(record.getTreePath());
+                    this.appendFile(fileToRead, record.getTreePath());
+                    break;
+                }
+            }
+            }
+        }
+        catch(Exception ex) {
+            System.out.println(ex);
+        }
+    }
+    
+    private void buildCode(Node node, String s) {
+        if (!node.checkIfLeaf()) {
+            buildCode(node.getLeft(),  s + '0');
+            buildCode(node.getRight(), s + '1');
+        }
+        else {
+            for(LookupTable record : this.lookupTable) {
+                if(record != null && record.findRecordByCharacter(node.getCharacter())) {
+                    this.lookupTable.get(this.lookupTable.indexOf(record)).appendTreePath(s);
+                    return;
+                }
+            }
+            this.lookupTable.add(new LookupTable(node.getCharacter(),s));
+        }
+    }
+    
+    private void writeFile(String fileToRead) {
+        //File file = new File(fileToRead+".hof");
+        try {
+            FileWriter fw = new FileWriter(fileToRead+".hof", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter writer = new PrintWriter(bw);
+            for(LookupTable record : this.lookupTable) {
+                writer.println(record.getCharacter()+" "+record.getTreePath());
+            }
+            writer.close();
+        }
+        catch(Exception ex) {
+            System.out.println(ex);
+        }
+    }
+    
+    private void appendFile(String fileToRead, String data) {
+        try {
+            FileWriter fw = new FileWriter(fileToRead+".hof", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter writer = new PrintWriter(bw);
+            writer.print(data);
+            writer.close();
+        }
+        catch(Exception ex) {
+            System.out.println(ex);
+        }
+    }
+    
     
 }

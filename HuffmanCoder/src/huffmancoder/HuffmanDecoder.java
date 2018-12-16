@@ -49,9 +49,7 @@ public class HuffmanDecoder {
                                 isLeaf = false;
                                 this.seqToDecode = this.seqToDecode.substring(5);
                             }
-                            else {
-                                if(this.seqToDecode.length() > 0) this.seqToDecode = this.seqToDecode.substring(K);
-                            }
+
                             if(isLeaf) node = node.getRight();
                             else node = node.getLeft();
                         }
