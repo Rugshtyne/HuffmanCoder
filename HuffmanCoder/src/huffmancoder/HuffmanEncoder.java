@@ -33,18 +33,13 @@ public class HuffmanEncoder {
             while((i = input.read())!=-1) {
                 this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
-            Collections.sort(frequencyTable, new Comparator<FreqTable>() {
-                @Override
-                public int compare(FreqTable freq1, FreqTable freq2 )
-                {
-                    return  freq1.getFreq() - freq2.getFreq();
-                }
-            });
             
 //            this.frequencyTable.forEach((line) -> {
-//                System.out.println(line.getFreq());
-//            });
+//                    System.out.println(line.getByteSeq() + "\t" + line.getFreq());
+//                });
+            
             Node root = this.CreateTree();
+            System.out.println("|"+K+"|");
             this.PrintTree(root);
         }
         catch(Exception ex) {
@@ -55,12 +50,20 @@ public class HuffmanEncoder {
     public void CreateFreqTable(String byteString) {
         try {
             final String byteStringToOperate;
+            
             if (byteString.length() == K) {
-                this.frequencyTable.forEach((line) -> {
-                    if (line.getByteSeq().equals(byteString)) {
-                        line.increaseFreq();
+//                this.frequencyTable.forEach((line) -> {
+//                    if (line.getByteSeq().equals(byteString)) {
+//                        this.frequencyTable.get(this.frequencyTable.indexOf(line)).increaseFreq();
+//                        return;
+//                    }
+//                });
+                for(FreqTable line : this.frequencyTable) {
+                    if(line.getByteSeq().equals(byteString)) {
+                        this.frequencyTable.get(this.frequencyTable.indexOf(line)).increaseFreq();
+                        return;
                     }
-                });
+                }
                 this.frequencyTable.add(new FreqTable(byteString));
             }
             else {
@@ -73,9 +76,10 @@ public class HuffmanEncoder {
                         this.frequencyTable.forEach((line) -> {
                             if (line.getByteSeq().equals(byteStringToOperate)) {
                                 line.increaseFreq();
-
                             }
+                            
                         });
+                        
                         this.frequencyTable.add(new FreqTable(byteStringToOperate));
                     }
                     else {
@@ -155,26 +159,43 @@ public class HuffmanEncoder {
         });
         
         while (treeArray.size() > 1) {
-            Node left = treeArray.get(0);
-            treeArray.remove(0);
-            Node right = treeArray.get(0);
-            treeArray.remove(0);
+            Node left = this.removeMinFreq(treeArray);
+            treeArray.remove(left);
+            Node right = this.removeMinFreq(treeArray);
+            treeArray.remove(right);
             Node parent = new Node(left.getFreq()+right.getFreq(),left,right);
             treeArray.add(parent);
         }
         return treeArray.get(0);
     }
     
+    private Node removeMinFreq(ArrayList<Node> list) {
+        
+        Collections.sort(list, new Comparator<Node>() {
+                @Override
+                public int compare(Node node1, Node node2 )
+                {
+                    return  node1.getFreq() - node2.getFreq();
+                }
+            });
+        
+        Node removedNode = list.get(0);
+        return removedNode;
+    }
+    
+
+    
     private static void PrintTree(Node node) {
         if (node.checkIfLeaf()) {
-            System.out.print("|Leaf|="+true);
-            System.out.print("|Character|="+node.getCharacter());
-            System.out.println("|Freq|="+node.getFreq());
+            System.out.println(true);
+            System.out.println(node.getCharacter());
             return;
         }
-        System.out.println("|Leaf|="+false);
+        
+        System.out.println(false);
         PrintTree(node.getLeft());
         PrintTree(node.getRight());
+        
     }
     
 }

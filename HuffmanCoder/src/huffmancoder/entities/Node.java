@@ -26,6 +26,12 @@ public class Node {
         this.left = left;
         this.right = right;
     }
+    
+    public Node(String character, Node left, Node right) {
+        this.character = character;
+        this.left = left;
+        this.right = right;
+    }
 
     public Node() {
     }
@@ -34,7 +40,7 @@ public class Node {
         return (left == null && right == null);
     }
     
-    public float compareFreq(Node otherNode) {
+    public int compareFreq(Node otherNode) {
         return this.freq - otherNode.freq;
     }
     
