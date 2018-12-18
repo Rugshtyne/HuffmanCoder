@@ -28,6 +28,7 @@ public class HuffmanEncoder {
     private ArrayList<FreqTable> frequencyTable;
     private ArrayList<LookupTable> lookupTable;
     private int K;
+    private StringBuilder sb;
     private String byteStringLeftover = "";
     private int isRemaining = 0;
     private String currentWord = "";
@@ -36,11 +37,11 @@ public class HuffmanEncoder {
         try {
             this.frequencyTable = new ArrayList<FreqTable>();
             this.lookupTable = new ArrayList<LookupTable>();
+            this.sb = new StringBuilder();
             this.K = K;
-            File a = new File(fileToRead);
-            BufferedReader input = new BufferedReader(new FileReader(a));
+            FileInputStream fileInput = new FileInputStream(fileToRead);
             int i = 0;            
-            while((i = input.read()) != -1) {
+            while((i = fileInput.read()) != -1) {
                 //this.appendFile(fileToRead, String.valueOf((char)i));
                 processByte(i, true);
                 processByteStringLeftover(true);
@@ -51,13 +52,17 @@ public class HuffmanEncoder {
             }
             Node root = this.CreateTree();
             //System.out.println("|"+K+"|");
-            //this.PrintTree(root);
+            this.PrintTree(root);
             this.buildCode(root, "");
             //this.writeFile(fileToRead);
-//            for(LookupTable record : this.lookupTable) {
-//                System.out.println(record.getCharacter()+"\t"+record.getTreePath());
+//            for(FreqTable table : this.frequencyTable) {
+//                System.out.println(Integer.parseInt(table.getByteSeq(),2)+"\t"+table.getFreq());
 //            }
-            this.HashFile(fileToRead);
+            for(LookupTable record : this.lookupTable) {
+                System.out.println(record.getCharacter()+"\t"+record.getTreePath());
+            }
+            System.out.println(sb.toString());
+            //this.HashFile(fileToRead);
         }
         catch(Exception ex) {
             System.out.println(ex);
@@ -112,103 +117,20 @@ public class HuffmanEncoder {
     }
     
     public void CreateFreqTable(String byteString) {
-        try {
-            final String byteStringToOperate;
-            
+        try {            
             if (byteString.length() == K) {
-//                this.frequencyTable.forEach((line) -> {
-//                    if (line.getByteSeq().equals(byteString)) {
-//                        this.frequencyTable.get(this.frequencyTable.indexOf(line)).increaseFreq();
-//                        return;
-//                    }
-//                });
                 for(FreqTable line : this.frequencyTable) {
                     if(line.getByteSeq().equals(byteString)) {
-                        this.frequencyTable.get(this.frequencyTable.indexOf(line)).increaseFreq();
+                        if (Integer.parseInt(byteString,2) == 80) {
+                            System.out.println("P");
+                        }
+                        FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
+                        lineRem.setFreq(lineRem.getFreq()+1);
+                        this.frequencyTable.add(lineRem);
                         return;
                     }
                 }
                 this.frequencyTable.add(new FreqTable(byteString));
-            }
-            else {
-                if(K < 8) {
-                    if (byteStringLeftover.length() == 0) {
-                        byteStringToOperate = byteString.substring(0,K);
-                        byteStringLeftover = byteString.substring(K-1);
-                        
-                        
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringToOperate)) {
-                                line.increaseFreq();
-                            }
-                            
-                        });
-                        
-                        this.frequencyTable.add(new FreqTable(byteStringToOperate));
-                    }
-                    else {
-                        byteStringToOperate = this.byteStringLeftover + 
-                                byteString.substring(0,K-this.byteStringLeftover.length());
-                        this.byteStringLeftover = byteString.substring(this.byteStringLeftover.length());
-                        
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringToOperate)) {
-                                line.increaseFreq();
-
-                            }
-                        });
-                        this.frequencyTable.add(new FreqTable(byteStringToOperate));
-                    }
-                    
-                    if (K == byteStringLeftover.length()) {
-                        
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringLeftover)) {
-                                line.increaseFreq();
-                            }
-                        });
-                        this.frequencyTable.add(new FreqTable(byteStringLeftover));
-                        
-                        byteStringLeftover = "";
-                    }
-                }
-                else if (K > 8) {                  
-                    if ((byteStringLeftover.length() + byteString.length()) == K) {
-                        byteStringToOperate = this.byteStringLeftover + byteString;
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringToOperate)) {
-                                line.increaseFreq();
-                            }
-                        });
-                        this.frequencyTable.add(new FreqTable(byteStringToOperate));
-                    }
-                    if ((byteStringLeftover.length() + byteString.length()) > K) {
-                        String byteStringToOperate2 = this.byteStringLeftover + byteString.substring(0, K-this.byteStringLeftover.length());
-                        this.byteStringLeftover = byteString.substring(K-this.byteStringLeftover.length());
-                        
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringToOperate2)) {
-                                line.increaseFreq();
-                            }
-                        });
-                        this.frequencyTable.add(new FreqTable(byteStringToOperate2));
-                    }
-                    if ((byteStringLeftover.length() + byteString.length()) < K) {
-                        this.byteStringLeftover = this.byteStringLeftover+byteString;
-                    }
-                    
-                    if (K == byteStringLeftover.length()) {
-                        
-                        this.frequencyTable.forEach((line) -> {
-                            if (line.getByteSeq().equals(byteStringLeftover)) {
-                                line.increaseFreq();
-                            }
-                        });
-                        this.frequencyTable.add(new FreqTable(byteStringLeftover));
-                        
-                        byteStringLeftover = "";
-                    }
-                }
             }
         }
         catch(Exception ex) {
@@ -217,7 +139,7 @@ public class HuffmanEncoder {
     }
     
     public Node CreateTree() {
-        ArrayList<Node> treeArray = new ArrayList<Node>();
+        ArrayList<Node> treeArray = new ArrayList<>();
         this.frequencyTable.forEach((line) -> {
             treeArray.add(new Node(line.getByteSeq(),line.getFreq(),null,null));
         });
@@ -247,17 +169,19 @@ public class HuffmanEncoder {
         return removedNode;
     }
     
-    private void PrintTree(Node node) {
-        if (node.checkIfLeaf()) {
-            System.out.print(1);
-            System.out.print(node.getCharacter());
-            return;
+    private void PrintTree(Node tree) {
+        if (tree != null) {
+                if (tree.getLeft() == null && tree.getRight() == null) {
+                        // 0 = leaf
+                        sb.append(0);
+                        sb.append((char)(Integer.parseInt(tree.getCharacter(), 2)));
+                } else {
+                        // 1 = internal node
+                        sb.append(1);
+                }
+                PrintTree(tree.getLeft());
+                PrintTree(tree.getRight());
         }
-        
-        System.out.print(0);
-        PrintTree(node.getLeft());
-        PrintTree(node.getRight());
-        
     }
     
     private String chopStringUsingK(String byteString) {
@@ -316,7 +240,7 @@ public class HuffmanEncoder {
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter writer = new PrintWriter(bw);
             for(LookupTable record : this.lookupTable) {
-                writer.println(record.getCharacter()+" "+record.getTreePath());
+                writer.println((char)Integer.parseInt(record.getCharacter(),2)+" "+record.getTreePath());
             }
             writer.close();
         }
