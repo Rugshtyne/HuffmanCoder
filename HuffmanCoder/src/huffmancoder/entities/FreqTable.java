@@ -31,4 +31,8 @@ public class FreqTable {
     public int getFreq() {
         return this.freq;
     }
+    
+    public void setFreq(int freq) {
+        this.freq = freq;
+    }
 }
