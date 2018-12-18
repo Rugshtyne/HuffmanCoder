@@ -29,6 +29,8 @@ public class HuffmanEncoder {
     private ArrayList<LookupTable> lookupTable;
     private int K;
     private String byteStringLeftover = "";
+    private int isRemaining = 0;
+    private String currentWord = "";
     
     public HuffmanEncoder(String fileToRead, int K) {
         try {
@@ -40,7 +42,12 @@ public class HuffmanEncoder {
             int i = 0;            
             while((i = input.read()) != -1) {
                 //this.appendFile(fileToRead, String.valueOf((char)i));
-                this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
+                processByte(i, true);
+                processByteStringLeftover(true);
+                if (!currentWord.isEmpty()){
+                    this.CreateFreqTable(this.currentWord);
+                }
+                //this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
             Node root = this.CreateTree();
             //System.out.println("|"+K+"|");
@@ -54,6 +61,53 @@ public class HuffmanEncoder {
         }
         catch(Exception ex) {
             System.out.println(ex);
+        }
+    }
+    
+    public void processByteStringLeftover(boolean creatingTable){
+        if (this.byteStringLeftover.length() >= K){
+            this.currentWord = this.byteStringLeftover.substring(0, this.K);
+            this.byteStringLeftover = this.byteStringLeftover.substring(this.K, this.byteStringLeftover.length());
+            if (creatingTable){
+                this.CreateFreqTable(this.currentWord);
+            }
+            else{
+                // KITA FUNKCIJA ČIA
+            }
+            this.currentWord = "";
+        }
+        else{
+            this.currentWord = this.byteStringLeftover;
+            this.isRemaining = this.K - this.byteStringLeftover.length();
+            this.byteStringLeftover = "";
+        }
+    }
+    
+    public void processByte(int byteInt, boolean creatingTable){
+        int compareTo;
+        while ( !byteStringLeftover.isEmpty() ){
+            processByteStringLeftover(creatingTable);
+        }
+        String formated = String.format("%8s", Integer.toBinaryString(byteInt)).replace(" ", "0"); 
+        compareTo = this.isRemaining == 0 ? this.K : this.isRemaining;
+        if (8 >= compareTo){
+            this.currentWord += formated.substring(0, compareTo);
+            this.byteStringLeftover = formated.substring(compareTo, 8);
+            if (creatingTable){
+                this.CreateFreqTable(this.currentWord);
+            }
+            else{
+                // KITA FUNKCIJA ČIA
+            }
+            this.currentWord = "";
+            if (this.isRemaining != 0) {
+                this.isRemaining = 0;
+            }
+        }
+        else{
+           this.currentWord += formated;
+           //System.out.println("PARTIAL WORD: "+currentWord);
+           this.isRemaining = compareTo - 8;
         }
     }
     
