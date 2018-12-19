@@ -21,7 +21,7 @@ public class HuffmanCoder {
         //String command = args[0];
         //String filePath = args[1];
         //int K = Integer.parseInt(args[2]);
-        String command = "Encode";
+        String command = "Decode";
         switch (command) {
             case "Encode": {
                 //Encoder class
@@ -30,7 +30,7 @@ public class HuffmanCoder {
             }
             case "Decode": {
                 //Decoder class
-                HuffmanDecoder decoder = new HuffmanDecoder("test4");
+                HuffmanDecoder decoder = new HuffmanDecoder("test_5.dat");
                 break;
             }
             default: {
