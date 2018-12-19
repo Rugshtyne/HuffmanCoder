@@ -42,6 +42,7 @@ public class HuffmanEncoder {
             FileInputStream fileInput = new FileInputStream(fileToRead);
             int i = 0;            
             while((i = fileInput.read()) != -1) {
+                //this.appendFile(fileToRead, String.valueOf((char)i));
                 processByte(i);
                 //this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
@@ -64,10 +65,6 @@ public class HuffmanEncoder {
             for(LookupTable record : this.lookupTable) {
                 System.out.println(record.getCharacter()+"\t"+record.getTreePath());
             }
-            System.out.println(sb.toString());
-            //this.writeFile(fileToRead);
-            //this.HashFile(fileToRead);
-            this.MedisTest();
             this.HashFile(fileToRead);
         }
         catch(Exception ex) {
@@ -75,7 +72,7 @@ public class HuffmanEncoder {
         }
     }
     
-    public void processByteStringLeftover(){
+public void processByteStringLeftover(){
         while( !this.byteStringLeftover.isEmpty() ){
             if (this.byteStringLeftover.length() >= K){
                 this.currentWord = this.byteStringLeftover.substring(0, this.K);
@@ -159,22 +156,26 @@ public class HuffmanEncoder {
            this.isRemaining = compareTo - 8;
         }
     }
-
+    
+    
     public void CreateFreqTable(String byteString) {
-        for(FreqTable line : this.frequencyTable) {
-            if(line.getByteSeq().equals(byteString)) {
-                if (Integer.parseInt(byteString,2) == 80) {
-                    System.out.println("P");
+        try {  
+                for(FreqTable line : this.frequencyTable) {
+                    if(line.getByteSeq().equals(byteString)) {
+                        if (Integer.parseInt(byteString,2) == 80) {
+                            System.out.println("P");
+                        }
+                        FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
+                        lineRem.setFreq(lineRem.getFreq()+1);
+                        this.frequencyTable.add(lineRem);
+                        return;
+                    }
                 }
-                FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
-                lineRem.setFreq(lineRem.getFreq()+1);
-                this.frequencyTable.add(lineRem);
-                return;
-            }
+                this.frequencyTable.add(new FreqTable(byteString));
         }
-        this.frequencyTable.add(new FreqTable(byteString));
-        
-        this.frequencyTable.add(new FreqTable(byteString));
+        catch(Exception ex) {
+            System.out.println(ex);
+        }
     }
     
     public Node CreateTree() {
