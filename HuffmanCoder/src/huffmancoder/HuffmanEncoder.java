@@ -42,7 +42,6 @@ public class HuffmanEncoder {
             FileInputStream fileInput = new FileInputStream(fileToRead);
             int i = 0;            
             while((i = fileInput.read()) != -1) {
-                //this.appendFile(fileToRead, String.valueOf((char)i));
                 processByte(i, true);
                 processByteStringLeftover(true);
                 if (!currentWord.isEmpty()){
@@ -62,7 +61,9 @@ public class HuffmanEncoder {
                 System.out.println(record.getCharacter()+"\t"+record.getTreePath());
             }
             System.out.println(sb.toString());
+            //this.writeFile(fileToRead);
             //this.HashFile(fileToRead);
+            this.MedisTest();
         }
         catch(Exception ex) {
             System.out.println(ex);
@@ -116,26 +117,16 @@ public class HuffmanEncoder {
         }
     }
     
-    public void CreateFreqTable(String byteString) {
-        try {            
-            if (byteString.length() == K) {
-                for(FreqTable line : this.frequencyTable) {
-                    if(line.getByteSeq().equals(byteString)) {
-                        if (Integer.parseInt(byteString,2) == 80) {
-                            System.out.println("P");
-                        }
-                        FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
-                        lineRem.setFreq(lineRem.getFreq()+1);
-                        this.frequencyTable.add(lineRem);
-                        return;
-                    }
-                }
-                this.frequencyTable.add(new FreqTable(byteString));
+    public void CreateFreqTable(String byteString) {          
+        for(FreqTable line : this.frequencyTable) {
+            if(line.getByteSeq().equals(byteString)) {
+                FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
+                lineRem.setFreq(lineRem.getFreq()+1);
+                this.frequencyTable.add(lineRem);
+                return;
             }
         }
-        catch(Exception ex) {
-            System.out.println(ex);
-        }
+        this.frequencyTable.add(new FreqTable(byteString));
     }
     
     public Node CreateTree() {
@@ -173,11 +164,12 @@ public class HuffmanEncoder {
         if (tree != null) {
                 if (tree.getLeft() == null && tree.getRight() == null) {
                         // 0 = leaf
-                        sb.append(0);
+                        sb.append("0");
                         sb.append((char)(Integer.parseInt(tree.getCharacter(), 2)));
+                        
                 } else {
                         // 1 = internal node
-                        sb.append(1);
+                        sb.append("1");
                 }
                 PrintTree(tree.getLeft());
                 PrintTree(tree.getRight());
@@ -239,14 +231,28 @@ public class HuffmanEncoder {
             FileWriter fw = new FileWriter(fileToRead+".hof", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter writer = new PrintWriter(bw);
-            for(LookupTable record : this.lookupTable) {
-                writer.println((char)Integer.parseInt(record.getCharacter(),2)+" "+record.getTreePath());
-            }
+            //for(LookupTable record : this.lookupTable) {
+                writer.print(sb.toString());
+            //}
             writer.close();
         }
         catch(Exception ex) {
             System.out.println(ex);
         }
+    }
+    
+    private void MedisTest() {
+        BinaryFile outputFile = new BinaryFile("medis_out",'w');
+        String serialized = sb.toString();
+		for (char c : serialized.toCharArray()) {
+			if (c == '0') {
+				outputFile.writeBit(false);
+			} else if (c == '1') {
+				outputFile.writeBit(true);
+			} else {
+				outputFile.writeChar(c);
+			}
+		}
     }
     
     private void appendFile(String fileToRead, String data) {
