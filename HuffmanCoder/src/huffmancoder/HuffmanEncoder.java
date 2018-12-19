@@ -65,7 +65,6 @@ public class HuffmanEncoder {
             for(LookupTable record : this.lookupTable) {
                 System.out.println(record.getCharacter()+"\t"+record.getTreePath());
             }
-            System.out.println(sb.toString());
             this.HashFile(fileToRead);
         }
         catch(Exception ex) {
@@ -287,7 +286,7 @@ public class HuffmanEncoder {
             FileWriter fw = new FileWriter(fileToRead+".hof", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter writer = new PrintWriter(bw);
-            writer.print(data);
+            writer.print((char)Integer.parseInt(data, 2));
             writer.close();
         }
         catch(Exception ex) {
