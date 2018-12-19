@@ -42,13 +42,17 @@ public class HuffmanEncoder {
             FileInputStream fileInput = new FileInputStream(fileToRead);
             int i = 0;            
             while((i = fileInput.read()) != -1) {
-                processByte(i, true);
-                processByteStringLeftover(true);
-                if (!currentWord.isEmpty()){
-                    this.CreateFreqTable(this.currentWord);
-                }
+                processByte(i);
                 //this.CreateFreqTable(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
             }
+            processByteStringLeftover();
+            if (!currentWord.isEmpty()){
+                this.CreateFreqTable(this.currentWord); 
+            }
+            this.isRemaining = 0;
+            this.currentWord = "";
+            fileInput.close();
+            
             Node root = this.CreateTree();
             //System.out.println("|"+K+"|");
             this.PrintTree(root);
@@ -64,47 +68,60 @@ public class HuffmanEncoder {
             //this.writeFile(fileToRead);
             //this.HashFile(fileToRead);
             this.MedisTest();
+            this.HashFile(fileToRead);
         }
         catch(Exception ex) {
             System.out.println(ex);
         }
     }
     
-    public void processByteStringLeftover(boolean creatingTable){
-        if (this.byteStringLeftover.length() >= K){
-            this.currentWord = this.byteStringLeftover.substring(0, this.K);
-            this.byteStringLeftover = this.byteStringLeftover.substring(this.K, this.byteStringLeftover.length());
-            if (creatingTable){
+    public void processByteStringLeftover(){
+        while( !this.byteStringLeftover.isEmpty() ){
+            if (this.byteStringLeftover.length() >= K){
+                this.currentWord = this.byteStringLeftover.substring(0, this.K);
+                this.byteStringLeftover = this.byteStringLeftover.substring(this.K, this.byteStringLeftover.length());
                 this.CreateFreqTable(this.currentWord);
+                this.currentWord = "";
             }
             else{
-                // KITA FUNKCIJA ČIA
+                this.currentWord = this.byteStringLeftover;
+                this.isRemaining = this.K - this.byteStringLeftover.length();
+                this.byteStringLeftover = "";
             }
-            this.currentWord = "";
-        }
-        else{
-            this.currentWord = this.byteStringLeftover;
-            this.isRemaining = this.K - this.byteStringLeftover.length();
-            this.byteStringLeftover = "";
         }
     }
     
-    public void processByte(int byteInt, boolean creatingTable){
-        int compareTo;
-        while ( !byteStringLeftover.isEmpty() ){
-            processByteStringLeftover(creatingTable);
+    public void processByteStringLeftover(String file){
+        while( !this.byteStringLeftover.isEmpty() ){
+            if (this.byteStringLeftover.length() >= K){
+                this.currentWord = this.byteStringLeftover.substring(0, this.K);
+                this.byteStringLeftover = this.byteStringLeftover.substring(this.K, this.byteStringLeftover.length());
+                for(LookupTable record : this.lookupTable) {
+                    if(record.getCharacter().equals(this.currentWord)) {
+                        //System.out.println(record.getTreePath());
+                        this.appendFile(file, record.getTreePath());
+                        break;
+                    }
+                }   
+                this.currentWord = "";
+            }
+            else{
+                this.currentWord = this.byteStringLeftover;
+                this.isRemaining = this.K - this.byteStringLeftover.length();
+                this.byteStringLeftover = "";
+            }
         }
+    }
+    
+    public void processByte(int byteInt){
+        int compareTo;
+        processByteStringLeftover();
         String formated = String.format("%8s", Integer.toBinaryString(byteInt)).replace(" ", "0"); 
         compareTo = this.isRemaining == 0 ? this.K : this.isRemaining;
         if (8 >= compareTo){
             this.currentWord += formated.substring(0, compareTo);
             this.byteStringLeftover = formated.substring(compareTo, 8);
-            if (creatingTable){
-                this.CreateFreqTable(this.currentWord);
-            }
-            else{
-                // KITA FUNKCIJA ČIA
-            }
+            this.CreateFreqTable(this.currentWord);
             this.currentWord = "";
             if (this.isRemaining != 0) {
                 this.isRemaining = 0;
@@ -117,15 +134,46 @@ public class HuffmanEncoder {
         }
     }
     
-    public void CreateFreqTable(String byteString) {          
+    public void processByte(int byteInt, String file){
+        int compareTo;
+        processByteStringLeftover(file);
+        String formated = String.format("%8s", Integer.toBinaryString(byteInt)).replace(" ", "0"); 
+        compareTo = this.isRemaining == 0 ? this.K : this.isRemaining;
+        if (8 >= compareTo){
+            this.currentWord += formated.substring(0, compareTo);
+            this.byteStringLeftover = formated.substring(compareTo, 8);
+            for(LookupTable record : this.lookupTable) {
+                if(record.getCharacter().equals(this.currentWord)) {
+                    this.appendFile(file, record.getTreePath());
+                    break;
+                }
+            }
+            this.currentWord = "";
+            if (this.isRemaining != 0) {
+                this.isRemaining = 0;
+            }
+        }
+        else{
+           this.currentWord += formated;
+           //System.out.println("PARTIAL WORD: "+currentWord);
+           this.isRemaining = compareTo - 8;
+        }
+    }
+
+    public void CreateFreqTable(String byteString) {
         for(FreqTable line : this.frequencyTable) {
             if(line.getByteSeq().equals(byteString)) {
+                if (Integer.parseInt(byteString,2) == 80) {
+                    System.out.println("P");
+                }
                 FreqTable lineRem = this.frequencyTable.remove(this.frequencyTable.indexOf(line));
                 lineRem.setFreq(lineRem.getFreq()+1);
                 this.frequencyTable.add(lineRem);
                 return;
             }
         }
+        this.frequencyTable.add(new FreqTable(byteString));
+        
         this.frequencyTable.add(new FreqTable(byteString));
     }
     
@@ -176,32 +224,22 @@ public class HuffmanEncoder {
         }
     }
     
-    private String chopStringUsingK(String byteString) {
-        String byteStringToReturn = byteString;
-        
-        if(K % 8 == 0) {
-            if (K == 8) {
-                byteStringToReturn = byteString;
-            }
-        }
-        return byteStringToReturn;
-    }
-    
     private void HashFile(String fileToRead) {
         try {
-        File file = new File(fileToRead);
-        BufferedReader input = new BufferedReader(new FileReader(file));
+            FileInputStream input = new FileInputStream(fileToRead);
             int i = 0;      
             while((i = input.read())!=-1) {
-                String toCode = this.chopStringUsingK(String.format("%8s", Integer.toBinaryString(i)).replace(' ', '0'));
-                //System.out.println((char)i);
-                for(LookupTable record : this.lookupTable) {
-                if(record.getCharacter().equals(toCode)) {
-                    //System.out.println(record.getTreePath());
-                    this.appendFile(fileToRead, record.getTreePath());
-                    break;
-                }
+                
+                processByte(i, fileToRead);  
             }
+            processByteStringLeftover(fileToRead);
+            if (!currentWord.isEmpty()){
+                for(LookupTable record : this.lookupTable) {
+                    if(record.getCharacter().equals(this.currentWord)) {
+                        this.appendFile(fileToRead, record.getTreePath());
+                        break;
+                    }
+                }
             }
         }
         catch(Exception ex) {
@@ -210,6 +248,7 @@ public class HuffmanEncoder {
     }
     
     private void buildCode(Node node, String s) {
+
         if (!node.checkIfLeaf()) {
             buildCode(node.getLeft(),  s + '0');
             buildCode(node.getRight(), s + '1');
@@ -257,10 +296,11 @@ public class HuffmanEncoder {
     
     private void appendFile(String fileToRead, String data) {
         try {
+            
             FileWriter fw = new FileWriter(fileToRead+".hof", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter writer = new PrintWriter(bw);
-            writer.print(data);
+            writer.print((char)Integer.parseInt(data, 2));
             writer.close();
         }
         catch(Exception ex) {

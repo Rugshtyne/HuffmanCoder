@@ -25,7 +25,7 @@ public class HuffmanCoder {
         switch (command) {
             case "Encode": {
                 //Encoder class
-                HuffmanEncoder encoder = new HuffmanEncoder("reikalavimai.txt",8);
+                HuffmanEncoder encoder = new HuffmanEncoder("/home/leonas/NetBeansProjects/HuffmanCoder/tekstas.txt",23);
                 break;
             }
             case "Decode": {
