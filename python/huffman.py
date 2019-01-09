@@ -15,6 +15,12 @@ byteStringLeftover = ""
 # byteArray = bytearray(my_bytes)
 # newFile.write(byteArray)
 
+def createFreqTable(byteString):
+	try:
+		
+	except Exception as e:
+		raise e
+
 def processByteStringLeftover(file=None):
 	global byteStringLeftover
 	global currentWord
@@ -26,7 +32,8 @@ def processByteStringLeftover(file=None):
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
 				pass
-				# for(LookupTable record : this.lookupTable) {
+				# NEPERRASYTA IS JAVOS
+				# !!! for(LookupTable record : this.lookupTable) {
     #                 if(record.getCharacter().equals(this.currentWord)) {
     #                     //System.out.println(record.getTreePath());
     #                     this.appendFile(file, record.getTreePath());
@@ -55,7 +62,8 @@ def processByte(byte, file=None):
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
 			pass
-			# for(LookupTable record : this.lookupTable) {
+			# NEPERRASYTA IS JAVOS
+			# !!! for(LookupTable record : this.lookupTable) {
 	#              if(record.getCharacter().equals(this.currentWord)) {
 	#                  this.appendFile(file, record.getTreePath());
 	#                  break;
@@ -63,6 +71,7 @@ def processByte(byte, file=None):
 	#          }
 		else:
    			print(currentWord)
+   			# NEPERRASYTA IS JAVOS
    			# !!! createFreqTable(currentWord)
 		currentWord = ""
 		if isRemaining != 0:
@@ -77,3 +86,10 @@ with open(sys.argv[1], "rb") as f:
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		b = f.read(1)
+	processByteStringLeftover()
+	if currentWord:
+		pass
+		# NEPERRASYTA IS JAVOS
+		# !!! createFreqTable(currentWord); 
+	isRemaining = 0
+	currentWord = ""
