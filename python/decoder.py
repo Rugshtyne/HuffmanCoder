@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 
 file = sys.argv[1]
 
@@ -33,19 +34,19 @@ def processFile(filename):
 			while b != b"":
 				binary_str = format(ord(b), 'b').zfill(8)
 				if firstByteFlag == 0:
-					print("K = ",binary_str[:5])
-					print("endingZeroes = ", binary_str[5:])
+					#print("K = ",binary_str[:5])
+					#print("endingZeroes = ", binary_str[5:])
 					K = int(binary_str[:5], 2)
 					endingZeroes = int(binary_str[5:], 2)
-					print("K = ", K)
-					print("endingZeroes = ", endingZeroes)
+					#print("K = ", K)
+					#print("endingZeroes = ", endingZeroes)
 					firstByteFlag = 1
 				else:
 					fileInLine += binary_str
 				b = f.read(1)
 			if endingZeroes != 0:
 				fileInLine = fileInLine[:-endingZeroes]
-			print(fileInLine)
+			#print(fileInLine)
 	except Exception as e:
 		raise e
 
@@ -83,8 +84,8 @@ def buildCode(node, line):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
 	else:
-		record = [rec for rec in lookupTable if (rec['Character'] == node.character)]
-		if (len(record) == 0):
+		record = next((x for x in lookupTable if x['Character'] == node.character), None)
+		if (record == None):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
 
@@ -96,10 +97,10 @@ def decodeFile():
 	for i in range(len(fileInLine)):
 		currentSeq = currentSeq + fileInLine[:1]
 		fileInLine = fileInLine[1:]
-		record = [rec for rec in lookupTable if (rec['Path'] == currentSeq)]
-		if (len(record) == 1):
+		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
+		if (record != None):
 			#print currentSeq
-			reverseFile = reverseFile + record[0]['Character']
+			reverseFile = reverseFile + record['Character']
 			currentSeq = ''
 
 def restoreFile():
@@ -119,12 +120,24 @@ def restoreFile():
 	with open(fileName, 'wb') as w:
 		w.write(finalByteArray)
 
-
+print ("---------- LOAD FILE ----------")
 processFile(file)
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+print ("---------- BUILD ROOT ----------")
 tree = readRoot()
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+print ("---------- BUILD TREE ----------")
 restoreTree(tree)
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+print ("---------- BUILD CODE ----------")
 buildCode(tree, '')
-print (lookupTable)
+#print (lookupTable)
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+print ("---------- DECODE FILE ----------")
 decodeFile()
-print (reverseFile)
+#print (reverseFile)
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+print ("---------- RESTORE FILE ----------")
 restoreFile()
+print ("---------- END ----------")
+print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))

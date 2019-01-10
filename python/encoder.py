@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 
 isRemaining = 0
 K = int(sys.argv[2])
@@ -40,13 +41,11 @@ def processByteStringLeftover(file=None):
 			currentWord = byteStringLeftover[0:K]
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
-				if (len(record) > 0):
-					print ("-- RECORD PLACED "+ str(record) +" --")
-					fileInLine = fileInLine + record[0]['Path']
+				record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+				if record != None:
+					fileInLine = fileInLine + record['Path']
 			else:
 				createFreqTable(currentWord)
-				# !!! createFreqTable(currentWord)
 			currentWord = ""
 		else:
 			currentWord = byteStringLeftover
@@ -66,10 +65,9 @@ def processByte(byte, file=None):
 		currentWord += binary_str[:compareTo]
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
-			if (len(record) > 0):
-				print ("-- RECORD PLACED "+ str(record) +" --")
-				fileInLine = fileInLine + record[0]['Path']
+			record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+			if record != None:
+				fileInLine = fileInLine + record['Path']
 		else:
    			createFreqTable(currentWord)
 		currentWord = ""
@@ -81,14 +79,12 @@ def processByte(byte, file=None):
 
 
 def createFreqTable(byteString):
-	record = [rec for rec in frequencyTable if (rec['Sequence'] == byteString)]
-	if (len(record) == 0):
+	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
+	if (record == None):
 		record = { "Sequence": byteString, "Frequence": 1}
 		frequencyTable.append(record)
-		print ("-- RECORD PLACED "+ str(record) +" --")
 	else:
-		record[0]["Frequence"] = record[0]["Frequence"] + 1
-		print ("-- RECORD UPDATED "+ str(record) +" --")
+		record["Frequence"] = record["Frequence"] + 1
 
 def CreateTree():
 	treeArray = []
@@ -114,8 +110,8 @@ def buildCode(node, line):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
 	else:
-		record = [rec for rec in lookupTable if (rec['Character'] == node.character)]
-		if (len(record) == 0):
+		record = next((x for x in lookupTable if x['Character'] == node.character), None)
+		if (record == None):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
 		else:
@@ -142,7 +138,7 @@ def writeBytesToFile(fileToWrite):
 
 	
 
-	print("trailingZeros = ",trailingZeros)
+	#print("trailingZeros = ",trailingZeros)
 
 	if trailingZeros != 0:
 		trailingZeros_binary = "{0:03b}".format(trailingZeros)
@@ -151,15 +147,15 @@ def writeBytesToFile(fileToWrite):
 
 	firstByte = K_binary + trailingZeros_binary
 
-	print("FIRSTBYTE = ",firstByte)
+	#print("FIRSTBYTE = ",firstByte)
 
 	treeAndFileString = treeInLine + fileInLine
 	treeAndFileString = [treeAndFileString[i:i+8] for i in range(0, len(treeAndFileString), 8)]
 
 	finalByteArray = [firstByte] + treeAndFileString
 
-	print("K_binary = ", K_binary)
-	print("trailingZeros_binary = ", trailingZeros_binary)
+	#print("K_binary = ", K_binary)
+	#print("trailingZeros_binary = ", trailingZeros_binary)
 	# print("finalByteArray = ", finalByteArray)
 
 	finalByteArray = [int(x, 2) for x in finalByteArray]
@@ -171,6 +167,7 @@ def writeBytesToFile(fileToWrite):
 
 
 with open(sys.argv[1], "rb") as f:
+	start_time = time.time()
 	print ("---------- CREATES FREQ TABLE ----------")
 	b = f.read(1)
 	while b != b"":
@@ -183,14 +180,16 @@ with open(sys.argv[1], "rb") as f:
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
+	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD TREE ----------")
 	root = CreateTree()
-	print ("---------- BUILD CODE (Lookup Table) ----------")
+	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
+	print ("---------- BUILD CODE ----------")
 	buildCode(root,'')
+	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
 	printTree(root)
-	#print(len(treeInLine))
-
+	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- WRITE FILE ----------")
 	f.seek(0)
 	b = f.read(1)
@@ -199,7 +198,7 @@ with open(sys.argv[1], "rb") as f:
 		b = f.read(1)
 	processByteStringLeftover("output")
 
-	print("LENGTH = ", len(treeInLine + fileInLine))
+	#print("LENGTH = ", len(treeInLine + fileInLine))
 
 	if len(treeInLine + fileInLine) % 8 != 0:
 		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
@@ -207,7 +206,8 @@ with open(sys.argv[1], "rb") as f:
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
 
-	print (treeInLine + fileInLine)
-	print (lookupTable)
+	#print (treeInLine + fileInLine)
+	#print (lookupTable)
 	writeBytesToFile(sys.argv[1])
 	print ("---------- END ----------")
+	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
