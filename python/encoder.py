@@ -42,6 +42,7 @@ def processByteStringLeftover(file=None):
 			if file is not None:
 				record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
 				if (len(record) > 0):
+					print ("-- RECORD PLACED "+ str(record) +" --")
 					fileInLine = fileInLine + record[0]['Path']
 			else:
 				createFreqTable(currentWord)
@@ -67,6 +68,7 @@ def processByte(byte, file=None):
 		if file is not None:
 			record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
 			if (len(record) > 0):
+				print ("-- RECORD PLACED "+ str(record) +" --")
 				fileInLine = fileInLine + record[0]['Path']
 		else:
    			createFreqTable(currentWord)
@@ -83,8 +85,10 @@ def createFreqTable(byteString):
 	if (len(record) == 0):
 		record = { "Sequence": byteString, "Frequence": 1}
 		frequencyTable.append(record)
+		print ("-- RECORD PLACED "+ str(record) +" --")
 	else:
 		record[0]["Frequence"] = record[0]["Frequence"] + 1
+		print ("-- RECORD UPDATED "+ str(record) +" --")
 
 def CreateTree():
 	treeArray = []
@@ -167,6 +171,7 @@ def writeBytesToFile(fileToWrite):
 
 
 with open(sys.argv[1], "rb") as f:
+	print ("---------- CREATES FREQ TABLE ----------")
 	b = f.read(1)
 	while b != b"":
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
@@ -178,11 +183,15 @@ with open(sys.argv[1], "rb") as f:
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
+	print ("---------- BUILD TREE ----------")
 	root = CreateTree()
+	print ("---------- BUILD CODE (Lookup Table) ----------")
 	buildCode(root,'')
+	print ("---------- PRINT TREE ----------")
 	printTree(root)
 	#print(len(treeInLine))
 
+	print ("---------- WRITE FILE ----------")
 	f.seek(0)
 	b = f.read(1)
 	while b != b"":
@@ -201,3 +210,4 @@ with open(sys.argv[1], "rb") as f:
 	print (treeInLine + fileInLine)
 	print (lookupTable)
 	writeBytesToFile(sys.argv[1])
+	print ("---------- END ----------")
