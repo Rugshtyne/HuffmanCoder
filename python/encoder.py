@@ -128,6 +128,32 @@ def printTree(tree):
 			printTree(tree.left)
 			printTree(tree.right)
 
+def writeBytesToFile(fileToWrite):
+	global K
+	global trailingZeros
+	global treeInLine
+	global fileInLine
+
+	K_binary = "{0:05b}".format(K)
+	trailingZeros_binary = "{0:03b}".format(trailingZeros)
+	firstByte = K_binary + trailingZeros_binary
+
+	treeAndFileString = treeInLine + fileInLine
+	treeAndFileString = [treeAndFileString[i:i+8] for i in range(0, len(treeAndFileString), 8)]
+
+	finalByteArray = [firstByte] + treeAndFileString
+
+	# print("K_binary = ", K_binary)
+	# print("trailingZeros_binary = ", trailingZeros_binary)
+	# print("finalByteArray = ", finalByteArray)
+
+	finalByteArray = [int(x, 2) for x in finalByteArray]
+	finalByteArray = bytes(finalByteArray)
+
+
+	with open(fileToWrite+'.huf', 'wb') as w:
+		w.write(finalByteArray)
+
 
 with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
@@ -135,15 +161,16 @@ with open(sys.argv[1], "rb") as f:
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		b = f.read(1)
-	processByteStringLeftover(None)
+	processByteStringLeftover()
 	if currentWord:
-		pass
+		#pass
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
 	root = CreateTree()
 	buildCode(root,'')
 	printTree(root)
+	#print(len(treeInLine))
 
 	f.seek(0)
 	b = f.read(1)
@@ -152,10 +179,9 @@ with open(sys.argv[1], "rb") as f:
 		b = f.read(1)
 	processByteStringLeftover("output")
 
-	trailingZeros = len(treeInLine + fileInLine) % 8
+	trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
 
-with open(sys.argv[1]+'.huf', 'wb') as w:
-	#w.write()
-	w.close()
+	writeBytesToFile(sys.argv[1])
+
