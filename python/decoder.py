@@ -33,6 +33,8 @@ def processFile(filename):
 			while b != b"":
 				binary_str = format(ord(b), 'b').zfill(8)
 				if firstByteFlag == 0:
+					print("K = ",binary_str[:5])
+					print("endingZeroes = ", binary_str[5:])
 					K = int(binary_str[:5], 2)
 					endingZeroes = int(binary_str[5:], 2)
 					print("K = ", K)
