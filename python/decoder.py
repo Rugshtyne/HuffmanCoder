@@ -2,8 +2,6 @@
 
 import sys
 
-sys.setrecursionlimit(1500)
-
 file = sys.argv[1]
 
 K = 8
@@ -28,16 +26,11 @@ def processFile(filename):
 	global endingZeroes
 	global fileInLine
 
-	temp_fileInLine = fileInLine
-
 	firstByteFlag = 0
 	try:
 		with open(filename, "rb") as f:
 			b = f.read(1)
-			count = 0
 			while b != b"":
-				print ("BYTE COUNT = ", count)
-				print(b)
 				binary_str = format(ord(b), 'b').zfill(8)
 				if firstByteFlag == 0:
 					print("K = ",binary_str[:5])
@@ -48,30 +41,24 @@ def processFile(filename):
 					print("endingZeroes = ", endingZeroes)
 					firstByteFlag = 1
 				else:
-					temp_fileInLine += binary_str
+					fileInLine += binary_str
 				b = f.read(1)
-				count += 1
 			if endingZeroes != 0:
-				temp_fileInLine = temp_fileInLine[:-endingZeroes]
-			fileInLine = temp_fileInLine
-			print(temp_fileInLine)
+				fileInLine = fileInLine[:-endingZeroes]
+			print(fileInLine)
 	except Exception as e:
 		raise e
 
 def restoreTree(tree):
 	global fileInLine
-	global K
-
-	temp_K = K
-
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
 	if bit == "1":
 		tree.left = Node(None,None,None,None)
 		restoreTree(tree.left)
 	else:
-		tree.left = Node(fileInLine[:temp_K], None, None, None)
-		fileInLine = fileInLine[temp_K:]
+		tree.left = Node(fileInLine[:K], None, None, None)
+		fileInLine = fileInLine[K:]
 
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
@@ -79,8 +66,8 @@ def restoreTree(tree):
 		tree.right = Node(None,None,None,None)
 		restoreTree(tree.right)
 	else:
-		tree.right = Node(fileInLine[:temp_K], None, None, None)
-		fileInLine = fileInLine[temp_K:]
+		tree.right = Node(fileInLine[:K], None, None, None)
+		fileInLine = fileInLine[K:]
 
 def readRoot():
 	global fileInLine
@@ -92,51 +79,33 @@ def readRoot():
 		return Node(fileInLine[:K], None, None, None)
 
 def buildCode(node, line):
-	global lookupTable
-	temp_lookupTable = lookupTable
-
 	if(node.checkIfLeaf() == False):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
 	else:
-		record = [rec for rec in temp_lookupTable if (rec['Character'] == node.character)]
+		record = [rec for rec in lookupTable if (rec['Character'] == node.character)]
 		if (len(record) == 0):
 			record = { "Character": node.character, "Path": line}
-			temp_lookupTable.append(record)
-	lookupTable = temp_lookupTable
+			lookupTable.append(record)
 
 def decodeFile():
 	global reverseFile
 	global fileInLine
-	global lookupTable
-
-	temp_lookupTable = lookupTable
-	temp_fileInLine = fileInLine
-	temp_reverseFile = reverseFile
 
 	currentSeq = ''
-	count = 0
-
-	print("LENGTH FILEINLINE = ", len(temp_fileInLine))
-	input("PRESS ENTER")
-	for i in range(len(temp_fileInLine)):
-		print("INSIDE LENGTH FILEINLINE = ", len(temp_fileInLine))
-		print("INSIDE DECODEFILE = ",count)
-		currentSeq = currentSeq + temp_fileInLine[:1]
-		temp_fileInLine = temp_fileInLine[1:]
-		# record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
-		# if (len(record) == 1):
-		# 	#print currentSeq
-		# 	temp_reverseFile = temp_reverseFile + record[0]['Character']
-		# 	currentSeq = ''
-		count += 1
-	fileInLine = temp_fileInLine
-	reverseFile = temp_reverseFile
+	for i in range(len(fileInLine)):
+		currentSeq = currentSeq + fileInLine[:1]
+		fileInLine = fileInLine[1:]
+		record = [rec for rec in lookupTable if (rec['Path'] == currentSeq)]
+		if (len(record) == 1):
+			#print currentSeq
+			reverseFile = reverseFile + record[0]['Character']
+			currentSeq = ''
 
 def restoreFile():
-	temp_reverseFile = reverseFile
+	global reverseFile
 
-	fileString = [temp_reverseFile[i:i+8] for i in range(0, len(temp_reverseFile), 8)]
+	fileString = [reverseFile[i:i+8] for i in range(0, len(reverseFile), 8)]
 	# print(fileString)
 
 	fileName = sys.argv[1][:-4]

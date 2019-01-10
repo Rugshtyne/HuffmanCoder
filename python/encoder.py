@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import time
 
 isRemaining = 0
 K = int(sys.argv[2])
@@ -41,9 +40,10 @@ def processByteStringLeftover(file=None):
 			currentWord = byteStringLeftover[0:K]
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				record = next((x for x in lookupTable if x['Character'] == currentWord), None)
-					#print ("--FILE PLACED "+ str(record) +" --")
-				fileInLine = fileInLine + record[0]['Path']
+				record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
+				if (len(record) > 0):
+					print ("-- RECORD PLACED "+ str(record) +" --")
+					fileInLine = fileInLine + record[0]['Path']
 			else:
 				createFreqTable(currentWord)
 				# !!! createFreqTable(currentWord)
@@ -66,9 +66,10 @@ def processByte(byte, file=None):
 		currentWord += binary_str[:compareTo]
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			record = next((x for x in lookupTable if x['Character'] == currentWord), None)
-			#print ("-- FILE PLACED "+ str(record) +" --")
-			fileInLine = fileInLine + record['Path']
+			record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
+			if (len(record) > 0):
+				print ("-- RECORD PLACED "+ str(record) +" --")
+				fileInLine = fileInLine + record[0]['Path']
 		else:
    			createFreqTable(currentWord)
 		currentWord = ""
@@ -80,15 +81,14 @@ def processByte(byte, file=None):
 
 
 def createFreqTable(byteString):
-	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
-	#record = [rec for rec in frequencyTable if (rec['Sequence'] == byteString)]
-	if (record == None):
+	record = [rec for rec in frequencyTable if (rec['Sequence'] == byteString)]
+	if (len(record) == 0):
 		record = { "Sequence": byteString, "Frequence": 1}
 		frequencyTable.append(record)
-		#print ("-- FREQ RECORD PLACED "+ str(record) +" --")
+		print ("-- RECORD PLACED "+ str(record) +" --")
 	else:
-		record["Frequence"] = record["Frequence"] + 1
-		#print ("-- FREQ RECORD UPDATED "+ str(record) +" --")
+		record[0]["Frequence"] = record[0]["Frequence"] + 1
+		print ("-- RECORD UPDATED "+ str(record) +" --")
 
 def CreateTree():
 	treeArray = []
@@ -121,15 +121,16 @@ def buildCode(node, line):
 		else:
 			record[0]["Path"] = line
 
-def printTree(tree, treeLine):
+def printTree(tree):
+	global treeInLine
 	if(tree != None):
 		if (tree.left == None and tree.right == None):
-			treeLine = treeLine + '0'
-			treeLine = treeLine + tree.character
+			treeInLine = treeInLine + '0'
+			treeInLine = treeInLine + tree.character
 		else:
-			treeLine = treeLine + '1'
-			printTree(tree.left, treeLine)
-			printTree(tree.right, treeLine)
+			treeInLine = treeInLine + '1'
+			printTree(tree.left)
+			printTree(tree.right)
 
 def writeBytesToFile(fileToWrite):
 	global K
@@ -170,41 +171,30 @@ def writeBytesToFile(fileToWrite):
 
 
 with open(sys.argv[1], "rb") as f:
-	start_time = time.time()
 	print ("---------- CREATES FREQ TABLE ----------")
 	b = f.read(1)
-	count = 1
 	while b != b"":
-		print ("---------- READ FILE FIRST ----------")
-		print ("---------- BYTE COUNT = ", count," ----------")
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		b = f.read(1)
-		count += 1
 	processByteStringLeftover()
 	if currentWord:
 		#pass
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
-	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD TREE ----------")
 	root = CreateTree()
-	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
-	print ("---------- BUILD CODE ----------")
+	print ("---------- BUILD CODE (Lookup Table) ----------")
 	buildCode(root,'')
-	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
-	treeLine = treeInLine
-	printTree(root, treeLine)
-	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
+	printTree(root)
 	#print(len(treeInLine))
 
 	print ("---------- WRITE FILE ----------")
 	f.seek(0)
 	b = f.read(1)
 	while b != b"":
-		print ("---------- READ FILE SECOND ----------")
 		processByte(b,"output")
 		b = f.read(1)
 	processByteStringLeftover("output")
@@ -220,5 +210,4 @@ with open(sys.argv[1], "rb") as f:
 	print (treeInLine + fileInLine)
 	print (lookupTable)
 	writeBytesToFile(sys.argv[1])
-	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- END ----------")
