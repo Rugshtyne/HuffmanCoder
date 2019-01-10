@@ -135,16 +135,27 @@ def writeBytesToFile(fileToWrite):
 	global fileInLine
 
 	K_binary = "{0:05b}".format(K)
-	trailingZeros_binary = "{0:03b}".format(trailingZeros)
+
+	
+
+	print("trailingZeros = ",trailingZeros)
+
+	if trailingZeros != 0:
+		trailingZeros_binary = "{0:03b}".format(trailingZeros)
+	else:
+		trailingZeros_binary = "000"
+
 	firstByte = K_binary + trailingZeros_binary
+
+	print("FIRSTBYTE = ",firstByte)
 
 	treeAndFileString = treeInLine + fileInLine
 	treeAndFileString = [treeAndFileString[i:i+8] for i in range(0, len(treeAndFileString), 8)]
 
 	finalByteArray = [firstByte] + treeAndFileString
 
-	# print("K_binary = ", K_binary)
-	# print("trailingZeros_binary = ", trailingZeros_binary)
+	print("K_binary = ", K_binary)
+	print("trailingZeros_binary = ", trailingZeros_binary)
 	# print("finalByteArray = ", finalByteArray)
 
 	finalByteArray = [int(x, 2) for x in finalByteArray]
@@ -179,7 +190,11 @@ with open(sys.argv[1], "rb") as f:
 		b = f.read(1)
 	processByteStringLeftover("output")
 
-	trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
+	print("LENGTH = ", len(treeInLine + fileInLine))
+
+	if len(treeInLine + fileInLine) % 8 != 0:
+		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
+	
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
 

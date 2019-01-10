@@ -43,7 +43,8 @@ def processFile(filename):
 				else:
 					fileInLine += binary_str
 				b = f.read(1)
-			fileInLine = fileInLine[:-endingZeroes]
+			if endingZeroes != 0:
+				fileInLine = fileInLine[:-endingZeroes]
 			print(fileInLine)
 	except Exception as e:
 		raise e
@@ -101,6 +102,23 @@ def decodeFile():
 			reverseFile = reverseFile + record[0]['Character']
 			currentSeq = ''
 
+def restoreFile():
+	global reverseFile
+
+	fileString = [reverseFile[i:i+8] for i in range(0, len(reverseFile), 8)]
+	# print(fileString)
+
+	fileName = sys.argv[1][:-4]
+	fileName = fileName[:-4]+"_restored"+fileName[-4:]
+	# print("FILENAME = ", fileName)
+
+	finalByteArray = [int(x, 2) for x in fileString]
+	finalByteArray = bytes(finalByteArray)
+
+
+	with open(fileName, 'wb') as w:
+		w.write(finalByteArray)
+
 
 processFile(file)
 tree = readRoot()
@@ -109,3 +127,4 @@ buildCode(tree, '')
 print (lookupTable)
 decodeFile()
 print (reverseFile)
+restoreFile()
