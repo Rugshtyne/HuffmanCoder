@@ -9,6 +9,8 @@ byteStringLeftover = ""
 frequencyTable = []
 lookupTable = []
 treeInLine = ''
+fileInLine = ''
+trailingZeros = 0
 
 class Node():
 	def __init__(self, character, freq, left, right):
@@ -31,23 +33,17 @@ def processByteStringLeftover(file=None):
 	global byteStringLeftover
 	global currentWord
 	global isRemaining
+	global fileInLine
 
 	while byteStringLeftover:
 		if len(byteStringLeftover) >= K:
 			currentWord = byteStringLeftover[0:K]
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				pass
-				# NEPERRASYTA IS JAVOS
-				# !!! for(LookupTable record : this.lookupTable) {
-    #                 if(record.getCharacter().equals(this.currentWord)) {
-    #                     //System.out.println(record.getTreePath());
-    #                     this.appendFile(file, record.getTreePath());
-    #                     break;
-    #                 }
-    #             }   
+				record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
+				if (len(record) > 0):
+					fileInLine = fileInLine + record[0]['Path']
 			else:
-				print(currentWord)
 				createFreqTable(currentWord)
 				# !!! createFreqTable(currentWord)
 			currentWord = ""
@@ -60,16 +56,18 @@ def processByte(byte, file=None):
 	global currentWord
 	global byteStringLeftover
 	global isRemaining
+	global fileInLine
 
-	processByteStringLeftover()
+	processByteStringLeftover(file)
 	binary_str = format(ord(byte), 'b').zfill(8)
 	compareTo = K if isRemaining == 0 else isRemaining
 	if compareTo <= 8:
 		currentWord += binary_str[:compareTo]
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			pass
 			record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
+			if (len(record) > 0):
+				fileInLine = fileInLine + record[0]['Path']
 		else:
    			createFreqTable(currentWord)
 		currentWord = ""
@@ -137,18 +135,26 @@ with open(sys.argv[1], "rb") as f:
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		b = f.read(1)
-	processByteStringLeftover()
+	processByteStringLeftover(None)
 	if currentWord:
 		pass
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
-	#print (frequencyTable)
 	root = CreateTree()
-	print(root.right)
 	buildCode(root,'')
 	printTree(root)
-	print(treeInLine)
+
+	f.seek(0)
+	b = f.read(1)
+	while b != b"":
+		processByte(b,"output")
+		b = f.read(1)
+	processByteStringLeftover("output")
+
+	trailingZeros = len(treeInLine + fileInLine) % 8
+	for i in range(0,trailingZeros):
+		fileInLine = fileInLine + '0'
 
 with open(sys.argv[1]+'.huf', 'wb') as w:
 	#w.write()
