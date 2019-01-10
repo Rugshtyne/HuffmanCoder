@@ -173,10 +173,14 @@ with open(sys.argv[1], "rb") as f:
 	start_time = time.time()
 	print ("---------- CREATES FREQ TABLE ----------")
 	b = f.read(1)
+	count = 1
 	while b != b"":
+		print ("---------- READ FILE FIRST ----------")
+		print ("---------- BYTE COUNT = ", count," ----------")
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		b = f.read(1)
+		count += 1
 	processByteStringLeftover()
 	if currentWord:
 		#pass
@@ -200,6 +204,7 @@ with open(sys.argv[1], "rb") as f:
 	f.seek(0)
 	b = f.read(1)
 	while b != b"":
+		print ("---------- READ FILE SECOND ----------")
 		processByte(b,"output")
 		b = f.read(1)
 	processByteStringLeftover("output")
