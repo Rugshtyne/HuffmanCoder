@@ -156,6 +156,8 @@ with open(sys.argv[1], "rb") as f:
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
 
+	print (treeInLine + fileInLine)
+
 with open(sys.argv[1]+'.huf', 'wb') as w:
 	#w.write()
 	w.close()
