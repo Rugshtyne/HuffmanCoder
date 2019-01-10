@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 
 isRemaining = 0
 K = int(sys.argv[2])
@@ -40,10 +41,9 @@ def processByteStringLeftover(file=None):
 			currentWord = byteStringLeftover[0:K]
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
-				if (len(record) > 0):
-					print ("-- RECORD PLACED "+ str(record) +" --")
-					fileInLine = fileInLine + record[0]['Path']
+				record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+					#print ("--FILE PLACED "+ str(record) +" --")
+				fileInLine = fileInLine + record[0]['Path']
 			else:
 				createFreqTable(currentWord)
 				# !!! createFreqTable(currentWord)
@@ -66,10 +66,9 @@ def processByte(byte, file=None):
 		currentWord += binary_str[:compareTo]
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			record = [rec for rec in lookupTable if (rec['Character'] == currentWord)]
-			if (len(record) > 0):
-				print ("-- RECORD PLACED "+ str(record) +" --")
-				fileInLine = fileInLine + record[0]['Path']
+			record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+			#print ("-- FILE PLACED "+ str(record) +" --")
+			fileInLine = fileInLine + record['Path']
 		else:
    			createFreqTable(currentWord)
 		currentWord = ""
@@ -81,14 +80,15 @@ def processByte(byte, file=None):
 
 
 def createFreqTable(byteString):
-	record = [rec for rec in frequencyTable if (rec['Sequence'] == byteString)]
-	if (len(record) == 0):
+	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
+	#record = [rec for rec in frequencyTable if (rec['Sequence'] == byteString)]
+	if (record == None):
 		record = { "Sequence": byteString, "Frequence": 1}
 		frequencyTable.append(record)
-		print ("-- RECORD PLACED "+ str(record) +" --")
+		#print ("-- FREQ RECORD PLACED "+ str(record) +" --")
 	else:
-		record[0]["Frequence"] = record[0]["Frequence"] + 1
-		print ("-- RECORD UPDATED "+ str(record) +" --")
+		record["Frequence"] = record["Frequence"] + 1
+		#print ("-- FREQ RECORD UPDATED "+ str(record) +" --")
 
 def CreateTree():
 	treeArray = []
@@ -121,16 +121,15 @@ def buildCode(node, line):
 		else:
 			record[0]["Path"] = line
 
-def printTree(tree):
-	global treeInLine
+def printTree(tree, treeLine):
 	if(tree != None):
 		if (tree.left == None and tree.right == None):
-			treeInLine = treeInLine + '0'
-			treeInLine = treeInLine + tree.character
+			treeLine = treeLine + '0'
+			treeLine = treeLine + tree.character
 		else:
-			treeInLine = treeInLine + '1'
-			printTree(tree.left)
-			printTree(tree.right)
+			treeLine = treeLine + '1'
+			printTree(tree.left, treeLine)
+			printTree(tree.right, treeLine)
 
 def writeBytesToFile(fileToWrite):
 	global K
@@ -171,6 +170,7 @@ def writeBytesToFile(fileToWrite):
 
 
 with open(sys.argv[1], "rb") as f:
+	start_time = time.time()
 	print ("---------- CREATES FREQ TABLE ----------")
 	b = f.read(1)
 	while b != b"":
@@ -183,12 +183,17 @@ with open(sys.argv[1], "rb") as f:
 		createFreqTable(currentWord)
 	isRemaining = 0
 	currentWord = ""
+	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD TREE ----------")
 	root = CreateTree()
-	print ("---------- BUILD CODE (Lookup Table) ----------")
+	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
+	print ("---------- BUILD CODE ----------")
 	buildCode(root,'')
+	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
-	printTree(root)
+	treeLine = treeInLine
+	printTree(root, treeLine)
+	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	#print(len(treeInLine))
 
 	print ("---------- WRITE FILE ----------")
@@ -210,4 +215,5 @@ with open(sys.argv[1], "rb") as f:
 	print (treeInLine + fileInLine)
 	print (lookupTable)
 	writeBytesToFile(sys.argv[1])
+	print("--TOTAL TIME: %s seconds --" % (time.time() - start_time))
 	print ("---------- END ----------")
