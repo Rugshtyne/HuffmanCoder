@@ -120,6 +120,7 @@ def restoreFile():
 	with open(fileName, 'wb') as w:
 		w.write(finalByteArray)
 
+start_time = time.time()
 print ("---------- LOAD FILE ----------")
 processFile(file)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
