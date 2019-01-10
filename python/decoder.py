@@ -68,6 +68,14 @@ def restoreTree(tree):
 		tree.right = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
 
+def readRoot():
+	global fileInLine
+	bit = fileInLine[:1]
+	fileInLine = fileInLine[1:]
+	if bit == "1":
+		return Node(None,None,None,None)
+	else:
+		return Node(fileInLine[:K], None, None, None)
 
 def buildCode(node, line):
 	if(node.checkIfLeaf() == False):
@@ -95,7 +103,7 @@ def decodeFile():
 
 
 processFile(file)
-tree = Node(None,None,None,None)
+tree = readRoot()
 restoreTree(tree)
 buildCode(tree, '')
 print (lookupTable)
