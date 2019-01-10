@@ -6,7 +6,7 @@ file = sys.argv[1]
 
 K = 8
 endingZeroes = 4
-fileInLine = '101001100110100111000011100100100100001100110100110000111011001111000011100010011100001110001010011001010011010111000010101100111100001110001000011001111100001110001101110000101011110111000011100111100100101000101101011010101100001110011101010010111100001110110100001100111100001010110001110000111011110001111110110000111000000000001'
+fileInLine = ''
 lookupTable = []
 reverseFile = ''
 
@@ -24,9 +24,9 @@ class Node():
 def processFile(filename):
 	global K
 	global endingZeroes
+	global fileInLine
 
 	firstByteFlag = 0
-	mainString = ""
 	try:
 		with open(filename, "rb") as f:
 			b = f.read(1)
@@ -41,10 +41,10 @@ def processFile(filename):
 					print("endingZeroes = ", endingZeroes)
 					firstByteFlag = 1
 				else:
-					mainString += binary_str
+					fileInLine += binary_str
 				b = f.read(1)
-			mainString = mainString[:-endingZeroes]
-			print(mainString)
+			fileInLine = fileInLine[:-endingZeroes]
+			print(fileInLine)
 	except Exception as e:
 		raise e
 
@@ -98,7 +98,6 @@ processFile(file)
 tree = Node(None,None,None,None)
 restoreTree(tree)
 buildCode(tree, '')
-print lookupTable
-#print fileInLine
+print (lookupTable)
 decodeFile()
-#print reverseFile
+print (reverseFile)

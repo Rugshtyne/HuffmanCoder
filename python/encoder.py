@@ -184,4 +184,5 @@ with open(sys.argv[1], "rb") as f:
 		fileInLine = fileInLine + '0'
 
 	print (treeInLine + fileInLine)
+	print (lookupTable)
 	writeBytesToFile(sys.argv[1])
