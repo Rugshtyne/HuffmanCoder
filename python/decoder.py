@@ -80,6 +80,7 @@ def restoreTree(tree):
 		tree.right = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
 
+
 def readRoot():
 	global fileInLine
 	bit = fileInLine[:1]
@@ -99,17 +100,21 @@ def buildCode(node, line):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
 
-def decodeFile():
+
+def decodeFile(root):
 	global reverseFile
 	temp_reverseFile = reverseFile
+	tree = root
 	fileInArray = fileInLine
-	currentSeq = ''
-	while True:
-		record = next((x for x in lookupTable if fileInArray.startswith(x['Path'])), None)
-		temp_reverseFile += record['Character']
-		fileInArray = fileInArray[len(record['Path']):]
-		if (len(fileInArray) < 1):
-			break
+	for i in range(0,len(fileInArray)):
+		if (fileInArray[i] == '0'):
+			tree = tree.left
+		else:
+			tree = tree.right
+		#print (tree, i)
+		if(tree.left == None and tree.right == None):
+			temp_reverseFile += tree.character 
+			tree = root
 	reverseFile = temp_reverseFile
 
 def restoreFile():
@@ -141,10 +146,10 @@ restoreTree(tree)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD CODE ----------")
 buildCode(tree, '')
-#print (lookupTable)
+lookupTable.sort(key=lambda x: x['Path'])
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- DECODE FILE ----------")
-decodeFile()
+decodeFile(tree)
 #print (reverseFile)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- RESTORE FILE ----------")
