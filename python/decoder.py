@@ -10,9 +10,6 @@ endingZeroes = 4
 fileInLine = ''
 lookupTable = []
 reverseFile = ''
-shortestPath = 0;
-fileLeftover = 0;
-
 class Node():
 	def __init__(self, character, freq, left, right):
 		self.character = character
@@ -65,7 +62,6 @@ def processFile(filename):
 
 def restoreTree(tree):
 	global fileInLine
-	global fileLeftover
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
 	if bit == "1":
@@ -83,7 +79,6 @@ def restoreTree(tree):
 	else:
 		tree.right = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
-	fileLeftover = len(fileInLine)
 
 def readRoot():
 	global fileInLine
@@ -95,7 +90,6 @@ def readRoot():
 		return Node(fileInLine[:K], None, None, None)
 
 def buildCode(node, line):
-	global shortestPath
 	if(node.checkIfLeaf() == False):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
@@ -104,15 +98,12 @@ def buildCode(node, line):
 		if (record == None):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
-			if len(line) < shortestPath or shortestPath == 0:
-				shortestPath = len(line)
 
 def decodeFile():
 	global reverseFile
 	temp_reverseFile = reverseFile
 	fileInArray = fileInLine
 	currentSeq = ''
-	count = 0
 	while True:
 		record = next((x for x in lookupTable if fileInArray.startswith(x['Path'])), None)
 		temp_reverseFile += record['Character']
@@ -147,7 +138,6 @@ tree = readRoot()
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD TREE ----------")
 restoreTree(tree)
-print(fileLeftover)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD CODE ----------")
 buildCode(tree, '')
