@@ -12,17 +12,15 @@ lookupTable = []
 treeInLine = ''
 fileInLine = ''
 trailingZeros = 0
+codes = []
 
 class Node():
+	path = ''
 	def __init__(self, character, freq, left, right):
 		self.character = character
 		self.freq = freq
 		self.left = left
 		self.right = right
-
-	def checkIfLeaf(self):
-		return (self.left == None and self.right == None)
-
 
 # my_bytes = [int(x, 2) for x in my_bytes]
 
@@ -30,20 +28,17 @@ class Node():
 # byteArray = bytearray(my_bytes)
 # newFile.write(byteArray)
 
-def processByteStringLeftover(file=None):
+def processByteStringLeftover(file=None, root=None):
 	global byteStringLeftover
 	global currentWord
 	global isRemaining
-	global fileInLine
 
 	while byteStringLeftover:
 		if len(byteStringLeftover) >= K:
 			currentWord = byteStringLeftover[0:K]
 			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				record = next((x for x in lookupTable if x['Character'] == currentWord), None)
-				if record != None:
-					fileInLine = fileInLine + record['Path']
+				buildCode(root, '',currentWord)
 			else:
 				createFreqTable(currentWord)
 			currentWord = ""
@@ -52,22 +47,19 @@ def processByteStringLeftover(file=None):
 			isRemaining = K - len(byteStringLeftover)
 			byteStringLeftover = ""
 
-def processByte(byte, file=None):
+def processByte(byte, file=None, root=None):
 	global currentWord
 	global byteStringLeftover
 	global isRemaining
-	global fileInLine
 
-	processByteStringLeftover(file)
+	processByteStringLeftover(file, root)
 	binary_str = format(ord(byte), 'b').zfill(8)
 	compareTo = K if isRemaining == 0 else isRemaining
 	if compareTo <= 8:
 		currentWord += binary_str[:compareTo]
 		byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			record = next((x for x in lookupTable if x['Character'] == currentWord), None)
-			if record != None:
-				fileInLine = fileInLine + record['Path']
+			buildCode(root, '',currentWord)
 		else:
    			createFreqTable(currentWord)
 		currentWord = ""
@@ -105,17 +97,15 @@ def removeMinFreq(list):
 	list.remove(returnNode)
 	return returnNode
 
-def buildCode(node, line):
-	if(node.checkIfLeaf() == False):
-		buildCode(node.left, line + "0")
-		buildCode(node.right, line + "1")
+def buildCode(node, line, word):
+	global fileInLine
+	if(node.left != None and node.right	!= None):
+		buildCode(node.left, line + "0", word)
+		buildCode(node.right, line + "1", word)
 	else:
-		record = next((x for x in lookupTable if x['Character'] == node.character), None)
-		if (record == None):
-			record = { "Character": node.character, "Path": line}
-			lookupTable.append(record)
-		else:
-			record["Path"] = line
+		if(node.character == word):
+			fileInLine += line
+
 
 def printTree(tree):
 	global treeInLine
@@ -127,6 +117,7 @@ def printTree(tree):
 			treeInLine = treeInLine + '1'
 			printTree(tree.left)
 			printTree(tree.right)
+
 
 def writeBytesToFile(fileToWrite, K, trailingZeros, treeInLine, fileInLine):
 	K_binary = "{0:05b}".format(K)
@@ -167,11 +158,11 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		print ("---------- FIRST READ ----------")
-		print("BYTES COUNT = ", count)
+		#print ("---------- FIRST READ ----------")
+		#print("BYTES COUNT = ", count)
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
-		count += 1
+		#count += 1
 		b = f.read(1)
 	processByteStringLeftover()
 	if currentWord:
@@ -184,8 +175,8 @@ with open(sys.argv[1], "rb") as f:
 	root = CreateTree()
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD CODE ----------")
-	buildCode(root,'')
-	print(lookupTable)
+	#buildCode(root,'')
+	#print(lookupTable)
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
 	printTree(root)
@@ -193,25 +184,19 @@ with open(sys.argv[1], "rb") as f:
 	print ("---------- WRITE FILE ----------")
 	f.seek(0)
 	b = f.read(1)
-	print("---------- SECOND READ ----------")
 	count = 1
 	while b != b"":
-		print("BYTE COUNT = ", count)
-		processByte(b,"output")
+		#print("BYTE COUNT = ", count)
+		processByte(b,"output", root)
 		count += 1
 		b = f.read(1)
-	processByteStringLeftover("output")
-
-	#print("LENGTH = ", len(treeInLine + fileInLine))
-
+	processByteStringLeftover("output",root)
 	if len(treeInLine + fileInLine) % 8 != 0:
 		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
 	
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
 
-	#print (treeInLine + fileInLine)
-	#print (lookupTable)
 	writeBytesToFile(sys.argv[1], K, trailingZeros, treeInLine, fileInLine)
 	print ("---------- END ----------")
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
