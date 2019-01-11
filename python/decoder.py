@@ -11,6 +11,7 @@ fileInLine = ''
 lookupTable = []
 reverseFile = ''
 shortestPath = 0;
+fileLeftover = 0;
 
 class Node():
 	def __init__(self, character, freq, left, right):
@@ -38,7 +39,7 @@ def processFile(filename):
 		with open(filename, "rb") as f:
 			b = f.read(1)
 			while b != b"":
-				print("PROCESSING FILE... ", count)
+				#print("PROCESSING FILE... ", count)
 				binary_str = format(ord(b), 'b').zfill(8)
 				if firstByteFlag == 0:
 					#print("K = ",binary_str[:5])
@@ -61,8 +62,10 @@ def processFile(filename):
 	except Exception as e:
 		raise e
 
+
 def restoreTree(tree):
 	global fileInLine
+	global fileLeftover
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
 	if bit == "1":
@@ -80,6 +83,7 @@ def restoreTree(tree):
 	else:
 		tree.right = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
+	fileLeftover = len(fileInLine)
 
 def readRoot():
 	global fileInLine
@@ -110,23 +114,25 @@ def decodeFile():
 	currentSeq = ''
 	count = 0
 	while True:
-		print("INSIDE DECODEFILE FOR LOOP ", count)
-		print("TEXT LEFTOVER: ", len(fileInArray))
+		#print("INSIDE DECODEFILE FOR LOOP ", count)
+		#print("TEXT LEFTOVER: ", len(fileInArray))
 		record = next((x for x in lookupTable if fileInArray.startswith(x['Path'])), None)
 		temp_reverseFile += record['Character']
-		fileInArray = fileInArray[len(record['Character']):]
-		'''currentSeq = currentSeq + fileInArray.pop(0)
-		#fileInLine = fileInLine[1:]
-		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
+		fileInArray = fileInArray[len(record['Path']):]
+		#currentSeq = currentSeq + fileInArray[:1]
+		#fileInArray = fileInArray[1:]
+		'''record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
 		if (record != None):
 			#print currentSeq
 			temp_reverseFile = temp_reverseFile + record['Character']
 			currentSeq = '''''
 		count += 1
-		if record == None:
+		'''if record == None:
 			print("NONE")
-			intput()
-		if (len(fileInArray) == 0):
+			input()
+			print (fileInArray)
+			print (len(fileInArray))'''
+		if (len(fileInArray) < 1):
 			break
 	reverseFile = temp_reverseFile
 
@@ -156,6 +162,7 @@ tree = readRoot()
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD TREE ----------")
 restoreTree(tree)
+print(fileLeftover)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD CODE ----------")
 buildCode(tree, '')

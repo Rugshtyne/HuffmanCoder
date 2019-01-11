@@ -12,7 +12,6 @@ lookupTable = []
 treeInLine = ''
 fileInLine = ''
 trailingZeros = 0
-shorttestPath = 0
 
 class Node():
 	def __init__(self, character, freq, left, right):
@@ -106,7 +105,7 @@ def removeMinFreq(list):
 	list.remove(returnNode)
 	return returnNode
 
-def buildCode(node, line, shorttestPath):
+def buildCode(node, line):
 	if(node.checkIfLeaf() == False):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
@@ -117,8 +116,6 @@ def buildCode(node, line, shorttestPath):
 			lookupTable.append(record)
 		else:
 			record["Path"] = line
-			if (len(record["Path"]) > shorttestPath):
-				shorttestPath = len(record["Path"])
 
 def printTree(tree):
 	global treeInLine
