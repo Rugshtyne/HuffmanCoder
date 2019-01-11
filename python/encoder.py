@@ -36,21 +36,31 @@ def processByteStringLeftover(file=None):
 	global isRemaining
 	global fileInLine
 
-	while byteStringLeftover:
-		if len(byteStringLeftover) >= K:
-			currentWord = byteStringLeftover[0:K]
-			byteStringLeftover = byteStringLeftover[K:] # arba len(byteStringLeftover) ?
+	temp_byteStringLeftover = byteStringLeftover
+	temp_currentWord = currentWord
+	temp_isRemaining = isRemaining
+	temp_fileInLine = fileInLine
+
+	while temp_byteStringLeftover:
+		if len(temp_byteStringLeftover) >= K:
+			temp_currentWord = temp_byteStringLeftover[0:K]
+			temp_byteStringLeftover = temp_byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+				record = next((x for x in lookupTable if x['Character'] == temp_currentWord), None)
 				if record != None:
-					fileInLine = fileInLine + record['Path']
+					temp_fileInLine += record['Path']
 			else:
-				createFreqTable(currentWord)
-			currentWord = ""
+				createFreqTable(temp_currentWord)
+			temp_currentWord = ""
 		else:
-			currentWord = byteStringLeftover
-			isRemaining = K - len(byteStringLeftover)
-			byteStringLeftover = ""
+			temp_currentWord = temp_byteStringLeftover
+			temp_isRemaining = K - len(temp_byteStringLeftover)
+			temp_byteStringLeftover = ""
+	byteStringLeftover = temp_byteStringLeftover
+	currentWord = temp_currentWord
+	isRemaining = temp_isRemaining
+	fileInLine = temp_fileInLine
+	fileInLine = "".join(temp_fileInLine)
 
 def processByte(byte, file=None):
 	global currentWord
@@ -58,24 +68,34 @@ def processByte(byte, file=None):
 	global isRemaining
 	global fileInLine
 
+	temp_currentWord = currentWord
+	temp_byteStringLeftover = byteStringLeftover
+	temp_isRemaining = isRemaining
+	temp_fileInLine = fileInLine
+
 	processByteStringLeftover(file)
 	binary_str = format(ord(byte), 'b').zfill(8)
 	compareTo = K if isRemaining == 0 else isRemaining
 	if compareTo <= 8:
-		currentWord += binary_str[:compareTo]
-		byteStringLeftover = binary_str[compareTo:8]
+		temp_currentWord += binary_str[:compareTo]
+		temp_byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			record = next((x for x in lookupTable if x['Character'] == currentWord), None)
+			# pass
+			record = next((x for x in lookupTable if x['Character'] == temp_currentWord), None)
 			if record != None:
-				fileInLine = fileInLine + record['Path']
+				temp_fileInLine += record['Path']
 		else:
-   			createFreqTable(currentWord)
-		currentWord = ""
-		if isRemaining != 0:
-			isRemaining = 0
+   			createFreqTable(temp_currentWord)
+		temp_currentWord = ""
+		if temp_isRemaining != 0:
+			temp_isRemaining = 0
 	else:
-		currentWord += binary_str
-		isRemaining = compareTo - 8
+		temp_currentWord += binary_str
+		temp_isRemaining = compareTo - 8
+	currentWord = temp_currentWord
+	byteStringLeftover = temp_byteStringLeftover
+	isRemaining = temp_isRemaining
+	fileInLine = temp_fileInLine
 
 
 def createFreqTable(byteString):
@@ -132,9 +152,6 @@ def writeBytesToFile(fileToWrite, K, trailingZeros, treeInLine, fileInLine):
 	K_binary = "{0:05b}".format(K)
 
 	
-
-	#print("trailingZeros = ",trailingZeros)
-
 	if trailingZeros != 0:
 		trailingZeros_binary = "{0:03b}".format(trailingZeros)
 	else:
@@ -167,8 +184,9 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		print ("---------- FIRST READ ----------")
-		print("BYTES COUNT = ", count)
+		#print ("---------- FIRST READ ----------")
+		#print("BYTES COUNT = ", count)
+		#print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 		#my_bytes.append(format(ord(b), 'b').zfill(8))
 		processByte(b)
 		count += 1
