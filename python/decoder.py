@@ -10,6 +10,7 @@ endingZeroes = 4
 fileInLine = ''
 lookupTable = []
 reverseFile = ''
+shortestPath = 0;
 
 class Node():
 	def __init__(self, character, freq, left, right):
@@ -80,6 +81,7 @@ def readRoot():
 		return Node(fileInLine[:K], None, None, None)
 
 def buildCode(node, line):
+	global shortestPath
 	if(node.checkIfLeaf() == False):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
@@ -88,6 +90,8 @@ def buildCode(node, line):
 		if (record == None):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
+			if len(line) < shortestPath or shortestPath == 0:
+				shortestPath = len(line)
 
 def decodeFile():
 	global reverseFile
@@ -95,8 +99,12 @@ def decodeFile():
 
 	currentSeq = ''
 	for i in range(len(fileInLine)):
-		currentSeq = currentSeq + fileInLine[:1]
-		fileInLine = fileInLine[1:]
+		if(currentSeq == ''):
+			currentSeq = fileInLine[:shortestPath]
+			fileInLine = fileInLine[shortestPath:]
+		else:
+			currentSeq = currentSeq + fileInLine[:1]
+			fileInLine = fileInLine[1:]
 		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
 		if (record != None):
 			#print currentSeq

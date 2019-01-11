@@ -12,6 +12,7 @@ lookupTable = []
 treeInLine = ''
 fileInLine = ''
 trailingZeros = 0
+shorttestPath = 0
 
 class Node():
 	def __init__(self, character, freq, left, right):
@@ -105,7 +106,7 @@ def removeMinFreq(list):
 	list.remove(returnNode)
 	return returnNode
 
-def buildCode(node, line):
+def buildCode(node, line, shorttestPath):
 	if(node.checkIfLeaf() == False):
 		buildCode(node.left, line + "0")
 		buildCode(node.right, line + "1")
@@ -115,7 +116,9 @@ def buildCode(node, line):
 			record = { "Character": node.character, "Path": line}
 			lookupTable.append(record)
 		else:
-			record[0]["Path"] = line
+			record["Path"] = line
+			if (len(record["Path"]) > shorttestPath):
+				shorttestPath = len(record["Path"])
 
 def printTree(tree):
 	global treeInLine
@@ -128,12 +131,7 @@ def printTree(tree):
 			printTree(tree.left)
 			printTree(tree.right)
 
-def writeBytesToFile(fileToWrite):
-	global K
-	global trailingZeros
-	global treeInLine
-	global fileInLine
-
+def writeBytesToFile(fileToWrite, K, trailingZeros, treeInLine, fileInLine):
 	K_binary = "{0:05b}".format(K)
 
 	
@@ -186,6 +184,7 @@ with open(sys.argv[1], "rb") as f:
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD CODE ----------")
 	buildCode(root,'')
+	print(lookupTable)
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
 	printTree(root)
@@ -208,6 +207,6 @@ with open(sys.argv[1], "rb") as f:
 
 	#print (treeInLine + fileInLine)
 	#print (lookupTable)
-	writeBytesToFile(sys.argv[1])
+	writeBytesToFile(sys.argv[1], K, trailingZeros, treeInLine, fileInLine)
 	print ("---------- END ----------")
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
