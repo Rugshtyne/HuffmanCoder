@@ -109,7 +109,7 @@ def decodeFile():
 
 	currentSeq = ''
 	count = 0
-	for i in range(len(fileInLine)):
+	while True:
 		print("INSIDE DECODEFILE FOR LOOP ", count)
 		currentSeq = currentSeq + fileInLine[:1]
 		fileInLine = fileInLine[1:]
@@ -119,6 +119,8 @@ def decodeFile():
 			reverseFile = reverseFile + record['Character']
 			currentSeq = ''
 		count += 1
+		if (len(fileInLine) == 0):
+			break
 
 def restoreFile():
 	global reverseFile
