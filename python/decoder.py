@@ -28,25 +28,35 @@ def processFile(filename):
 	global endingZeroes
 	global fileInLine
 
+	temp_K = K
+	temp_endingZeroes = endingZeroes
+	temp_fileInLine = fileInLine
+
 	firstByteFlag = 0
+	count = 1
 	try:
 		with open(filename, "rb") as f:
 			b = f.read(1)
 			while b != b"":
+				print("PROCESSING FILE... ", count)
 				binary_str = format(ord(b), 'b').zfill(8)
 				if firstByteFlag == 0:
 					#print("K = ",binary_str[:5])
 					#print("endingZeroes = ", binary_str[5:])
-					K = int(binary_str[:5], 2)
-					endingZeroes = int(binary_str[5:], 2)
+					temp_K = int(binary_str[:5], 2)
+					temp_endingZeroes = int(binary_str[5:], 2)
 					#print("K = ", K)
 					#print("endingZeroes = ", endingZeroes)
 					firstByteFlag = 1
 				else:
-					fileInLine += binary_str
+					temp_fileInLine += binary_str
+				count += 1
 				b = f.read(1)
-			if endingZeroes != 0:
-				fileInLine = fileInLine[:-endingZeroes]
+			K = temp_K
+			endingZeroes = temp_endingZeroes
+			if temp_endingZeroes != 0:
+				temp_fileInLine = temp_fileInLine[:-temp_endingZeroes]
+			fileInLine = temp_fileInLine
 			#print(fileInLine)
 	except Exception as e:
 		raise e
@@ -98,18 +108,17 @@ def decodeFile():
 	global fileInLine
 
 	currentSeq = ''
+	count = 0
 	for i in range(len(fileInLine)):
-		if(currentSeq == ''):
-			currentSeq = fileInLine[:shortestPath]
-			fileInLine = fileInLine[shortestPath:]
-		else:
-			currentSeq = currentSeq + fileInLine[:1]
-			fileInLine = fileInLine[1:]
+		print("INSIDE DECODEFILE FOR LOOP ", count)
+		currentSeq = currentSeq + fileInLine[:1]
+		fileInLine = fileInLine[1:]
 		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
 		if (record != None):
 			#print currentSeq
 			reverseFile = reverseFile + record['Character']
 			currentSeq = ''
+		count += 1
 
 def restoreFile():
 	global reverseFile
