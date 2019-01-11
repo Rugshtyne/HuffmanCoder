@@ -105,26 +105,30 @@ def buildCode(node, line):
 
 def decodeFile():
 	global reverseFile
-	global fileInLine
-
+	temp_reverseFile = reverseFile
+	fileInArray = fileInLine
 	currentSeq = ''
 	count = 0
 	while True:
 		print("INSIDE DECODEFILE FOR LOOP ", count)
-		if(currentSeq == ''):
-			currentSeq = fileInLine[:shortestPath]
-			fileInLine = fileInLine[shortestPath:]
-		else:
-			currentSeq = currentSeq + fileInLine[:1]
-			fileInLine = fileInLine[1:]
+		print("TEXT LEFTOVER: ", len(fileInArray))
+		record = next((x for x in lookupTable if fileInArray.startswith(x['Path'])), None)
+		temp_reverseFile += record['Character']
+		fileInArray = fileInArray[len(record['Character']):]
+		'''currentSeq = currentSeq + fileInArray.pop(0)
+		#fileInLine = fileInLine[1:]
 		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
 		if (record != None):
 			#print currentSeq
-			reverseFile = reverseFile + record['Character']
-			currentSeq = ''
+			temp_reverseFile = temp_reverseFile + record['Character']
+			currentSeq = '''''
 		count += 1
-		if (len(fileInLine) == 0):
+		if record == None:
+			print("NONE")
+			intput()
+		if (len(fileInArray) == 0):
 			break
+	reverseFile = temp_reverseFile
 
 def restoreFile():
 	global reverseFile
