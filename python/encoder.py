@@ -43,7 +43,7 @@ def processByteStringLeftover(file=None, root=None):
 			temp_currentWord = temp_byteStringLeftover[0:K]
 			temp_byteStringLeftover = temp_byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
-				buildCode(root, '',currentWord)
+				buildCode(root, '',temp_currentWord)
 			else:
 				createFreqTable(temp_currentWord)
 			temp_currentWord = ""
@@ -54,8 +54,8 @@ def processByteStringLeftover(file=None, root=None):
 	byteStringLeftover = temp_byteStringLeftover
 	currentWord = temp_currentWord
 	isRemaining = temp_isRemaining
-	fileInLine = temp_fileInLine
-	fileInLine = "".join(temp_fileInLine)
+	# fileInLine = temp_fileInLine
+	# fileInLine = "".join(temp_fileInLine)
 
 def processByte(byte, file=None, root=None):
 	global currentWord
@@ -74,7 +74,7 @@ def processByte(byte, file=None, root=None):
 		temp_currentWord += binary_str[:compareTo]
 		temp_byteStringLeftover = binary_str[compareTo:8]
 		if file is not None:
-			buildCode(root, '',currentWord)
+			buildCode(root, '', temp_currentWord)
 		else:
    			createFreqTable(temp_currentWord)
 		temp_currentWord = ""
@@ -86,7 +86,7 @@ def processByte(byte, file=None, root=None):
 	currentWord = temp_currentWord
 	byteStringLeftover = temp_byteStringLeftover
 	isRemaining = temp_isRemaining
-	fileInLine = temp_fileInLine
+	# fileInLine = temp_fileInLine
 
 
 def createFreqTable(byteString):
@@ -118,6 +118,7 @@ def removeMinFreq(list):
 
 def buildCode(node, line, word):
 	global fileInLine
+	
 	if(node.left != None and node.right	!= None):
 		buildCode(node.left, line + "0", word)
 		buildCode(node.right, line + "1", word)
@@ -202,7 +203,7 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		#print("BYTE COUNT = ", count)
+		print("BYTE COUNT = ", count)
 		processByte(b,"output", root)
 		count += 1
 		b = f.read(1)
