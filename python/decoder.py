@@ -111,8 +111,12 @@ def decodeFile():
 	count = 0
 	while True:
 		print("INSIDE DECODEFILE FOR LOOP ", count)
-		currentSeq = currentSeq + fileInLine[:1]
-		fileInLine = fileInLine[1:]
+		if(currentSeq == ''):
+			currentSeq = fileInLine[:shortestPath]
+			fileInLine = fileInLine[shortestPath:]
+		else:
+			currentSeq = currentSeq + fileInLine[:1]
+			fileInLine = fileInLine[1:]
 		record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
 		if (record != None):
 			#print currentSeq
