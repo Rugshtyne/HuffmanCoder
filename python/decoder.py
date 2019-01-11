@@ -114,24 +114,9 @@ def decodeFile():
 	currentSeq = ''
 	count = 0
 	while True:
-		#print("INSIDE DECODEFILE FOR LOOP ", count)
-		#print("TEXT LEFTOVER: ", len(fileInArray))
 		record = next((x for x in lookupTable if fileInArray.startswith(x['Path'])), None)
 		temp_reverseFile += record['Character']
 		fileInArray = fileInArray[len(record['Path']):]
-		#currentSeq = currentSeq + fileInArray[:1]
-		#fileInArray = fileInArray[1:]
-		'''record = next((x for x in lookupTable if x['Path'] == currentSeq), None)
-		if (record != None):
-			#print currentSeq
-			temp_reverseFile = temp_reverseFile + record['Character']
-			currentSeq = '''''
-		count += 1
-		'''if record == None:
-			print("NONE")
-			input()
-			print (fileInArray)
-			print (len(fileInArray))'''
 		if (len(fileInArray) < 1):
 			break
 	reverseFile = temp_reverseFile
