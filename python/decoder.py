@@ -22,13 +22,13 @@ class Node():
 
 
 def processFile(filename):
-	global K
-	global endingZeroes
-	global fileInLine
+	# global K
+	# global endingZeroes
+	# global fileInLine
 
-	temp_K = K
-	temp_endingZeroes = endingZeroes
-	temp_fileInLine = fileInLine
+	temp_K = 0
+	temp_endingZeroes = 0
+	temp_fileInLine = ""
 
 	firstByteFlag = 0
 	count = 1
@@ -54,19 +54,20 @@ def processFile(filename):
 			endingZeroes = temp_endingZeroes
 			if temp_endingZeroes != 0:
 				temp_fileInLine = temp_fileInLine[:-temp_endingZeroes]
-			fileInLine = temp_fileInLine
+			return temp_K, temp_endingZeroes, temp_fileInLine
+			#fileInLine = temp_fileInLine
 			#print(fileInLine)
 	except Exception as e:
 		raise e
 
 
-def restoreTree(tree):
-	global fileInLine
+def restoreTree(tree, fileInLine):
+	#global fileInLine
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
 	if bit == "1":
 		tree.left = Node(None,None,None,None)
-		restoreTree(tree.left)
+		fileInLine = restoreTree(tree.left, fileInLine)
 	else:
 		tree.left = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
@@ -75,20 +76,21 @@ def restoreTree(tree):
 	fileInLine = fileInLine[1:]
 	if bit == "1":
 		tree.right = Node(None,None,None,None)
-		restoreTree(tree.right)
+		fileInLine = restoreTree(tree.right, fileInLine)
 	else:
 		tree.right = Node(fileInLine[:K], None, None, None)
 		fileInLine = fileInLine[K:]
+	return fileInLine
 
 
-def readRoot():
-	global fileInLine
+def readRoot(fileInLine):
+	#global fileInLine
 	bit = fileInLine[:1]
 	fileInLine = fileInLine[1:]
 	if bit == "1":
-		return Node(None,None,None,None)
+		return Node(None,None,None,None), fileInLine
 	else:
-		return Node(fileInLine[:K], None, None, None)
+		return Node(fileInLine[:K], None, None, None), fileInLine
 
 def buildCode(node, line):
 	if(node.checkIfLeaf() == False):
@@ -101,8 +103,8 @@ def buildCode(node, line):
 			lookupTable.append(record)
 
 
-def decodeFile(root):
-	global reverseFile
+def decodeFile(root, reverseFile):
+	#global reverseFile
 	temp_reverseFile = reverseFile
 	tree = root
 	fileInArray = fileInLine
@@ -115,10 +117,10 @@ def decodeFile(root):
 		if(tree.left == None and tree.right == None):
 			temp_reverseFile += tree.character 
 			tree = root
-	reverseFile = temp_reverseFile
+	return temp_reverseFile
 
 def restoreFile():
-	global reverseFile
+	#global reverseFile
 
 	fileString = [reverseFile[i:i+8] for i in range(0, len(reverseFile), 8)]
 	# print(fileString)
@@ -136,20 +138,20 @@ def restoreFile():
 
 start_time = time.time()
 print ("---------- LOAD FILE ----------")
-processFile(file)
+K, endingZeroes, fileInLine = processFile(file)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD ROOT ----------")
-tree = readRoot()
+tree, fileInLine = readRoot(fileInLine)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD TREE ----------")
-restoreTree(tree)
+fileInLine = restoreTree(tree, fileInLine)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD CODE ----------")
 buildCode(tree, '')
 lookupTable.sort(key=lambda x: x['Path'])
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- DECODE FILE ----------")
-decodeFile(tree)
+reverseFile = decodeFile(tree, reverseFile)
 #print (reverseFile)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- RESTORE FILE ----------")
