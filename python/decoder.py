@@ -29,6 +29,7 @@ def processFile(filename):
 	temp_K = 0
 	temp_endingZeroes = 0
 	temp_fileInLine = ""
+	lastByte = ""
 
 	firstByteFlag = 0
 	count = 1
@@ -38,6 +39,7 @@ def processFile(filename):
 			while b != b"":
 				#print("PROCESSING FILE... ", count)
 				binary_str = format(ord(b), 'b').zfill(8)
+				lastByte = format(ord(b), 'b')
 				if firstByteFlag == 0:
 					#print("K = ",binary_str[:5])
 					#print("endingZeroes = ", binary_str[5:])
@@ -48,7 +50,6 @@ def processFile(filename):
 					firstByteFlag = 1
 				else:
 					temp_fileInLine += binary_str
-				count += 1
 				b = f.read(1)
 			K = temp_K
 			endingZeroes = temp_endingZeroes
@@ -115,6 +116,7 @@ def decodeFile(root, reverseFile):
 			tree = tree.right
 		#print (tree, i)
 		if(tree.left == None and tree.right == None):
+			# print("word: ", tree.character)
 			temp_reverseFile += tree.character 
 			tree = root
 	return temp_reverseFile
@@ -152,7 +154,7 @@ lookupTable.sort(key=lambda x: x['Path'])
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- DECODE FILE ----------")
 reverseFile = decodeFile(tree, reverseFile)
-#print (reverseFile)
+# print(reverseFile)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- RESTORE FILE ----------")
 restoreFile()

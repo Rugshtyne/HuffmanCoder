@@ -53,6 +53,7 @@ def processByteStringLeftover(temp_currentWord, temp_byteStringLeftover,  temp_i
 			temp_currentWord = temp_byteStringLeftover
 			temp_isRemaining = K - len(temp_byteStringLeftover)
 			temp_byteStringLeftover = ""
+	return temp_currentWord, temp_byteStringLeftover, temp_isRemaining
 	# byteStringLeftover = temp_byteStringLeftover
 	# currentWord = temp_currentWord
 	# isRemaining = temp_isRemaining
@@ -65,7 +66,7 @@ def processByte(temp_currentWord, temp_byteStringLeftover, temp_isRemaining, tem
 	# global isRemaining
 	# global fileInLine
 
-	processByteStringLeftover(temp_currentWord, temp_byteStringLeftover, temp_isRemaining, temp_fileInLine, file, root)
+	temp_currentWord, temp_byteStringLeftover, temp_isRemaining = processByteStringLeftover(temp_currentWord, temp_byteStringLeftover, temp_isRemaining, temp_fileInLine, file, root)
 	# temp_currentWord = currentWord
 	# temp_byteStringLeftover = byteStringLeftover
 	# temp_isRemaining = isRemaining
@@ -86,6 +87,7 @@ def processByte(temp_currentWord, temp_byteStringLeftover, temp_isRemaining, tem
 	else:
 		temp_currentWord += binary_str
 		temp_isRemaining = compareTo - 8
+	return temp_currentWord, temp_byteStringLeftover, temp_isRemaining
 	# currentWord = temp_currentWord
 	# byteStringLeftover = temp_byteStringLeftover
 	# isRemaining = temp_isRemaining
@@ -193,13 +195,11 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		#print ("---------- FIRST READ ----------")
-		#print("BYTES COUNT = ", count)
-		#my_bytes.append(format(ord(b), 'b').zfill(8))
-		processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b)
+		# print(currentWord)
+		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b)
 		#count += 1
 		b = f.read(1)
-	processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine)
+	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine)
 	if currentWord:
 		#pass
 		createFreqTable(currentWord)
@@ -227,10 +227,10 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b,"output", root)
+		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b,"output", root)
 		count += 1
 		b = f.read(1)
-	processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
+	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
 	fileInLine = "".join(fileInLine)
 	if len(treeInLine + fileInLine) % 8 != 0:
 		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
