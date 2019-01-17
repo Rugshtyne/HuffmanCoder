@@ -13,6 +13,7 @@ fileInLine = []
 trailingZeros = 0
 codes = []
 dictionary = {}
+reqBits = 0
 
 class Node():
 	path = ''
@@ -67,8 +68,10 @@ def processByte(temp_currentWord, temp_byteStringLeftover, temp_isRemaining, tem
 
 def createFreqTable(byteString):
 	if(len(byteString) < K):
+		global reqBits
+		reqBits = K - len(byteString)
 		for i in range(0,K - len(byteString)):
-			byteString = '0' + byteString
+			byteString = byteString + '0'
 	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
 	if (record == None):
 		record = { "Sequence": byteString, "Frequence": 1}
@@ -78,7 +81,9 @@ def createFreqTable(byteString):
 
 def CreateTree():
 	treeArray = []
-	for record in frequencyTable:
+	shortestFlag = 0
+	sortedTable = sorted(frequencyTable, key = lambda i: len(i['Sequence']))
+	for record in sortedTable:
 		node = Node(record['Sequence'], record['Frequence'], None, None)
 		treeArray.append(node)
 
@@ -137,6 +142,7 @@ def writeBytesToFile(fileToWrite, K, trailingZeros, treeInLine, fileInLine):
 	#print("FIRSTBYTE = ",firstByte)
 
 	treeAndFileString = treeInLine + fileInLine
+
 	treeAndFileString = [treeAndFileString[i:i+8] for i in range(0, len(treeAndFileString), 8)]
 
 	finalByteArray = [firstByte] + treeAndFileString
@@ -194,8 +200,23 @@ with open(sys.argv[1], "rb") as f:
 		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b,"output", root)
 		count += 1
 		b = f.read(1)
+
+	#Prisegam nulius prie paskutinio
+	if(len(currentWord) < K):
+		# print("LAST WORD IN WRITE:")
+		# print(currentWord)
+		for i in range(0,K - len(currentWord)):
+			currentWord = currentWord + '0'
 	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
 	fileInLine = "".join(fileInLine)
+
+
+	reqBits_binary = "00000"
+	if reqBits != 0:
+		reqBits_binary = "{0:05b}".format(reqBits)
+
+	treeInLine = reqBits_binary + treeInLine
+	
 	if len(treeInLine + fileInLine) % 8 != 0:
 		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
 	
