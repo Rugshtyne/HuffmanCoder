@@ -16,22 +16,15 @@ dictionary = {}
 reqBits = 0
 
 class Node():
-	path = ''
 	def __init__(self, character, freq, left, right):
 		self.character = character
 		self.freq = freq
 		self.left = left
 		self.right = right
 
-# my_bytes = [int(x, 2) for x in my_bytes]
-
-# newFile = open("test.bin", "w+b")
-# byteArray = bytearray(my_bytes)
-# newFile.write(byteArray)
-
 def processByteStringLeftover(temp_currentWord, temp_byteStringLeftover,  temp_isRemaining, temp_fileInLine, file=None, root=None):
 	while temp_byteStringLeftover:
-		if len(temp_byteStringLeftover) >= K:
+		if len(temp_byteStringLeftover) >= K:  
 			temp_currentWord = temp_byteStringLeftover[0:K]
 			temp_byteStringLeftover = temp_byteStringLeftover[K:] # arba len(byteStringLeftover) ?
 			if file is not None:
@@ -70,7 +63,7 @@ def createFreqTable(byteString):
 	if(len(byteString) < K):
 		global reqBits
 		reqBits = K - len(byteString)
-		for i in range(0,K - len(byteString)):
+		for i in range(0,reqBits):
 			byteString = byteString + '0'
 	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
 	if (record == None):
@@ -198,31 +191,32 @@ with open(sys.argv[1], "rb") as f:
 	count = 1
 	while b != b"":
 		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b,"output", root)
-		count += 1
+		#count += 1
 		b = f.read(1)
 
 	#Prisegam nulius prie paskutinio
-	if(len(currentWord) < K):
-		# print("LAST WORD IN WRITE:")
-		# print(currentWord)
+	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
+	if(len(currentWord) < K and len(currentWord) > 0):
+		print("LAST WORD IN WRITE:")
+		print(currentWord)
 		for i in range(0,K - len(currentWord)):
 			currentWord = currentWord + '0'
-	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
-	fileInLine = "".join(fileInLine)
+	if currentWord:
+		print (currentWord)
+		fileInLine.append(buildCode(currentWord))
 
+	fileInLine = "".join(fileInLine)
 
 	reqBits_binary = "00000"
 	if reqBits != 0:
 		reqBits_binary = "{0:05b}".format(reqBits)
 
 	treeInLine = reqBits_binary + treeInLine
-	
 	if len(treeInLine + fileInLine) % 8 != 0:
 		trailingZeros = 8 - (len(treeInLine + fileInLine) % 8)
 	
 	for i in range(0,trailingZeros):
 		fileInLine = fileInLine + '0'
-
 	writeBytesToFile(sys.argv[1], K, trailingZeros, treeInLine, fileInLine)
 	print ("---------- END ----------")
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
