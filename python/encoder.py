@@ -7,7 +7,7 @@ isRemaining = 0
 K = int(sys.argv[2])
 currentWord = ""
 byteStringLeftover = ""
-frequencyTable = []
+frequencyTable = {}
 treeInLine = []
 fileInLine = []
 trailingZeros = 0
@@ -65,19 +65,13 @@ def createFreqTable(byteString):
 		reqBits = K - len(byteString)
 		for i in range(0,reqBits):
 			byteString = byteString + '0'
-	record = next((x for x in frequencyTable if x['Sequence'] == byteString), None)
-	if (record == None):
-		record = { "Sequence": byteString, "Frequence": 1}
-		frequencyTable.append(record)
-	else:
-		record["Frequence"] = record["Frequence"] + 1
+	frequencyTable[byteString] = frequencyTable.get(byteString, 0) + 1
 
 def CreateTree():
 	treeArray = []
 	shortestFlag = 0
-	sortedTable = sorted(frequencyTable, key = lambda i: len(i['Sequence']))
-	for record in sortedTable:
-		node = Node(record['Sequence'], record['Frequence'], None, None)
+	for key, value in frequencyTable.items():
+		node = Node(key, value, None, None)
 		treeArray.append(node)
 
 	while len(treeArray) > 1:
