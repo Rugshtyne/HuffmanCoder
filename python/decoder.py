@@ -33,7 +33,6 @@ def processFile(filename):
 		with open(filename, "rb") as f:
 			b = f.read(1)
 			while b != b"":
-				#print("PROCESSING FILE... ", count)
 				binary_str = format(ord(b), 'b').zfill(8)
 				if (reqBitsFlag == 0 and firstByteFlag == 1):
 					reqBits = int(binary_str[:5], 2)
@@ -41,13 +40,8 @@ def processFile(filename):
 					temp_fileInLine += binary_str
 					reqBitsFlag = 1
 				elif firstByteFlag == 0:
-					#print("firstByteFlag")
-					#print("K = ",binary_str[:5])
-					#print("endingZeroes = ", binary_str[5:])
 					temp_K = int(binary_str[:5], 2)
 					temp_endingZeroes = int(binary_str[5:], 2)
-					#print("K = ", K)
-					#print("endingZeroes = ", endingZeroes)
 					firstByteFlag = 1
 				else:
 					#print("GOOD")
@@ -124,32 +118,19 @@ def restoreFile():
 start_time = time.time()
 print ("---------- LOAD FILE ----------")
 K, endingZeroes, fileInLine, reqBits = processFile(file)
-#print("K: %s, zeroes: %s" % (K, endingZeroes))
-#print("PO LOAD:")
-#print(fileInLine)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD ROOT ----------")
 tree, fileInLine = readRoot(fileInLine)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- BUILD TREE ----------")
-print("FILEINLINE BEFORE TREE")
-#print(fileInLine)
 fileInLine = restoreTree(tree, fileInLine)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- DECODE FILE ----------")
-
 reverseFile = decodeFile(tree, reverseFile)
-#print(reverseFile)
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 print ("---------- RESTORE FILE ----------")
-#print("BEFORE REMOVAL:")
-#print(reverseFile)
 if(reqBits > 0):
 	reverseFile = reverseFile[:-reqBits]
-#print("AFTER:")
-#print(reverseFile)
-#print(reqBits)
 restoreFile()
 print ("---------- END ----------")
-#print("K: %s, zeroes: %s, reqBits: %s" % (K, endingZeroes, reqBits))
 print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))

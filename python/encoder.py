@@ -109,8 +109,6 @@ def buildDict(node, s, dictionary):
 
 
 def printTree(treeInLine, tree):
-	#global treeInLine
-	#print("PIRMAS treeInLine: ", treeInLine)
 	if(tree != None):
 		if (tree.left == None and tree.right == None):
 			treeInLine.append('0')
@@ -132,17 +130,11 @@ def writeBytesToFile(fileToWrite, K, trailingZeros, treeInLine, fileInLine):
 
 	firstByte = K_binary + trailingZeros_binary
 
-	#print("FIRSTBYTE = ",firstByte)
-
 	treeAndFileString = treeInLine + fileInLine
 
 	treeAndFileString = [treeAndFileString[i:i+8] for i in range(0, len(treeAndFileString), 8)]
 
 	finalByteArray = [firstByte] + treeAndFileString
-
-	#print("K_binary = ", K_binary)
-	#print("trailingZeros_binary = ", trailingZeros_binary)
-	# print("finalByteArray = ", finalByteArray)
 
 	finalByteArray = [int(x, 2) for x in finalByteArray]
 	finalByteArray = bytes(finalByteArray)
@@ -158,9 +150,7 @@ with open(sys.argv[1], "rb") as f:
 	b = f.read(1)
 	count = 1
 	while b != b"":
-		# print(currentWord)
 		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b)
-		#count += 1
 		b = f.read(1)
 	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine)
 	if currentWord:
@@ -173,17 +163,10 @@ with open(sys.argv[1], "rb") as f:
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- BUILD DICIONARY -----")
 	buildDict(root, "", dictionary)
-	#print(dictionary)
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
-	# print ("---------- BUILD CODE ----------")
-	# #buildCode(root,'')
-	#print(dictionary)
-	#print(frequencyTable)
-	# print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- PRINT TREE ----------")
 	printTree(treeInLine, root)
 	treeInLine = "".join(treeInLine)
-	#print("TREE: ", treeInLine)
 	print("-- TIME ELAPSED: %s seconds --" % (time.time() - start_time))
 	print ("---------- WRITE FILE ----------")
 	f.seek(0)
@@ -191,18 +174,14 @@ with open(sys.argv[1], "rb") as f:
 	count = 1
 	while b != b"":
 		currentWord, byteStringLeftover, isRemaining = processByte(currentWord, byteStringLeftover, isRemaining, fileInLine, b,"output", root)
-		#count += 1
 		b = f.read(1)
 
 	#Prisegam nulius prie paskutinio
 	currentWord, byteStringLeftover, isRemaining = processByteStringLeftover(currentWord, byteStringLeftover, isRemaining, fileInLine, "output",root)
 	if(len(currentWord) < K and len(currentWord) > 0):
-		print("LAST WORD IN WRITE:")
-		print(currentWord)
 		for i in range(0,K - len(currentWord)):
 			currentWord = currentWord + '0'
 	if currentWord:
-		print (currentWord)
 		fileInLine.append(buildCode(currentWord))
 
 	fileInLine = "".join(fileInLine)
